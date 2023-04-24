@@ -1,0 +1,31 @@
+{
+  "kind": "collectionType",
+  "collectionName": "assets",
+  "info": {
+    "singularName": "asset",
+    "pluralName": "assets",
+    "displayName": "Asset"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name": {
+      "type": "string"
+    },
+    "stock": {
+      "type": "integer"
+    },
+    "picture": {
+      "allowedTypes": [
+        "images"
+      ],
+      "type": "media",
+      "multiple": false
+    },
+    "price": {
+      "type": "biginteger"
+    }
+  }
+}

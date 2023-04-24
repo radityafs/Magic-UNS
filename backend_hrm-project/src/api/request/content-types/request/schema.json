@@ -1,0 +1,49 @@
+{
+  "kind": "collectionType",
+  "collectionName": "requests",
+  "info": {
+    "singularName": "request",
+    "pluralName": "requests",
+    "displayName": "Request",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "user": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "admin::user"
+    },
+    "request_type": {
+      "type": "enumeration",
+      "enum": [
+        "permit",
+        "item",
+        "other"
+      ],
+      "required": true
+    },
+    "note": {
+      "type": "text",
+      "required": true
+    },
+    "request_date": {
+      "type": "date"
+    },
+    "is_approved": {
+      "type": "enumeration",
+      "enum": [
+        "waiting",
+        "approved",
+        "rejected"
+      ],
+      "default": "waiting"
+    },
+    "feedback": {
+      "type": "text"
+    }
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "kind": "collectionType",
+  "collectionName": "asset_histories",
+  "info": {
+    "singularName": "asset-history",
+    "pluralName": "asset-histories",
+    "displayName": "Asset History"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "user": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "admin::user"
+    },
+    "asset": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::asset.asset"
+    },
+    "till_date": {
+      "type": "date"
+    },
+    "state": {
+      "type": "enumeration",
+      "enum": [
+        "borrowed",
+        "returned",
+        "damaged",
+        "lost"
+      ],
+      "default": "borrowed"
+    }
+  }
+}

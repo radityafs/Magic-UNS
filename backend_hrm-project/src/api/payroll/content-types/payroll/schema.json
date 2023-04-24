@@ -1,0 +1,35 @@
+{
+  "kind": "collectionType",
+  "collectionName": "payrolls",
+  "info": {
+    "singularName": "payroll",
+    "pluralName": "payrolls",
+    "displayName": "Payroll"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "user": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "admin::user"
+    },
+    "work_days": {
+      "type": "integer"
+    },
+    "tax": {
+      "type": "biginteger"
+    },
+    "bonus": {
+      "type": "biginteger"
+    },
+    "work_salary": {
+      "type": "biginteger"
+    },
+    "total_salary": {
+      "type": "biginteger"
+    }
+  }
+}
