@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.magic.officeapp.ui.navigation.Screen
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
@@ -126,7 +127,13 @@ fun SplashScreen(
 
             Row(modifier = Modifier.fillMaxWidth()) {
                 Button(
-                    onClick = { /*TODO*/ },
+                    onClick = {
+                        navController.navigate(Screen.LoginScreen.route){
+                            popUpTo(Screen.SplashScreen.route){
+                                inclusive = true
+                            }
+                        }
+                    },
                     modifier = Modifier
                         .padding(top = 25.dp)
                         .fillMaxWidth()
@@ -140,10 +147,15 @@ fun SplashScreen(
                 }
             }
 
-
             Row(modifier = Modifier.fillMaxWidth()) {
                 Button(
-                    onClick = { /*TODO*/ },
+                    onClick = {
+                        navController.navigate(Screen.LoginScreen.route){
+                            popUpTo(Screen.SplashScreen.route){
+                                inclusive = true
+                            }
+                        }
+                    },
                     modifier = Modifier
                         .padding(top = 25.dp)
                         .fillMaxWidth()

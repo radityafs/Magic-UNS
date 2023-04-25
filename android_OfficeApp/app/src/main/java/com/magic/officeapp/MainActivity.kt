@@ -1,7 +1,6 @@
 package com.magic.officeapp
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -20,6 +19,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.magic.officeapp.ui.component.BottomNavigationBar
 import com.magic.officeapp.ui.navigation.Screen
+import com.magic.officeapp.ui.screen.LoginScreen
 import com.magic.officeapp.ui.screen.SplashScreen
 import com.magic.officeapp.ui.theme.OfficeAppTheme
 import com.magic.officeapp.ui.viewmodel.AuthViewModel
@@ -45,13 +45,10 @@ class MainActivity : ComponentActivity() {
 
                     Scaffold(
                         bottomBar = {
-                            if (currentRoute != Screen.SplashScreen.route) {
+                            if (currentRoute != Screen.SplashScreen.route && currentRoute != Screen.LoginScreen.route) {
                                 BottomNavigationBar(navController = navController)
                             }
                         },
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(16.dp),
                     ) {
                         NavHost(
                             navController = navController,
@@ -60,6 +57,10 @@ class MainActivity : ComponentActivity() {
 
                             composable(Screen.SplashScreen.route) {
                                 SplashScreen(navController = navController)
+                            }
+
+                            composable(Screen.LoginScreen.route) {
+                                LoginScreen(navController = navController)
                             }
 
                             composable(Screen.HomeScreen.route) {
@@ -79,8 +80,6 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                 }
-
-
             }
         }
     }

@@ -6,7 +6,7 @@ import androidx.navigation.compose.rememberNavController
 import com.magic.officeapp.ui.navigation.Screen
 
 @Composable
-fun Screen.HomeScreen(
+fun HomeScreen(
     navController: NavController = rememberNavController(),
 ) {
 

@@ -20,7 +20,6 @@ val Context.userDataStore: DataStore<Preferences> by preferencesDataStore(
 @InstallIn(SingletonComponent::class)
 object RepositoryModule {
 
-
     @Provides
     @Singleton
     fun provideAuthRepository(

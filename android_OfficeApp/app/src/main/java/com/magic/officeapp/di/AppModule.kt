@@ -19,7 +19,6 @@ object AppModule {
         return Retrofit.Builder().baseUrl("https://api.themoviedb.org/3/")
             .addConverterFactory(GsonConverterFactory.create()).build()
     }
-
     @Provides
     @Singleton
     fun apiAuth(retrofit: Retrofit): ApiAuthInterface {
