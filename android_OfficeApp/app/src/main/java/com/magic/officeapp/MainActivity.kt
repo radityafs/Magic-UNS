@@ -25,6 +25,7 @@ import com.magic.officeapp.ui.component.BottomNavigationBar
 import com.magic.officeapp.ui.navigation.Screen
 import com.magic.officeapp.ui.screen.HomeScreen
 import com.magic.officeapp.ui.screen.LoginScreen
+import com.magic.officeapp.ui.screen.ProfileScreen
 import com.magic.officeapp.ui.screen.SplashScreen
 import com.magic.officeapp.ui.theme.Grey600
 import com.magic.officeapp.ui.theme.Grey700
@@ -52,12 +53,12 @@ class MainActivity : ComponentActivity() {
 
                     Scaffold(
                         bottomBar = {
-                            if (currentRoute != Screen.LoginScreen.route && currentRoute != Screen.SplashScreen.route) {
+                            if (currentRoute != Screen.LoginScreen.route && currentRoute != Screen.SplashScreen.route && currentRoute != Screen.ProfileScreen.route) {
                                 BottomNavigationBar(navController = navController)
                             }
                         },
                         floatingActionButton = {
-                            if (currentRoute != Screen.LoginScreen.route && currentRoute != Screen.SplashScreen.route) {
+                            if (currentRoute != Screen.LoginScreen.route && currentRoute != Screen.SplashScreen.route && currentRoute != Screen.ProfileScreen.route) {
 
                                 FloatingActionButton(
                                     onClick = { /*TODO*/ },
@@ -102,7 +103,7 @@ class MainActivity : ComponentActivity() {
                             }
 
                             composable(Screen.ProfileScreen.route) {
-                                Text(text = "Profile")
+                                ProfileScreen(navController = navController)
                             }
                         }
                     }

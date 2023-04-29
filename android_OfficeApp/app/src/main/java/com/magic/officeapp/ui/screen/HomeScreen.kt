@@ -25,6 +25,7 @@ import androidx.navigation.compose.rememberNavController
 import com.magic.officeapp.R
 import com.magic.officeapp.ui.component.CustomCard
 import com.magic.officeapp.ui.component.Menu
+import com.magic.officeapp.ui.navigation.Screen
 import com.magic.officeapp.ui.theme.Grey800
 
 
@@ -65,6 +66,9 @@ fun HomeScreen(
                         modifier = Modifier
                             .size(50.dp)
                             .clip(CircleShape)
+                            .clickable {
+                                navController.navigate(Screen.ProfileScreen.route)
+                            }
                     )
                 }
 
