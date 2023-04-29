@@ -4,13 +4,17 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
@@ -19,8 +23,11 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.magic.officeapp.ui.component.BottomNavigationBar
 import com.magic.officeapp.ui.navigation.Screen
+import com.magic.officeapp.ui.screen.HomeScreen
 import com.magic.officeapp.ui.screen.LoginScreen
 import com.magic.officeapp.ui.screen.SplashScreen
+import com.magic.officeapp.ui.theme.Grey600
+import com.magic.officeapp.ui.theme.Grey700
 import com.magic.officeapp.ui.theme.OfficeAppTheme
 import com.magic.officeapp.ui.viewmodel.AuthViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -45,10 +52,30 @@ class MainActivity : ComponentActivity() {
 
                     Scaffold(
                         bottomBar = {
-                            if (currentRoute != Screen.SplashScreen.route && currentRoute != Screen.LoginScreen.route) {
+                            if (currentRoute != Screen.LoginScreen.route && currentRoute != Screen.SplashScreen.route) {
                                 BottomNavigationBar(navController = navController)
                             }
                         },
+                        floatingActionButton = {
+                            if (currentRoute != Screen.LoginScreen.route && currentRoute != Screen.SplashScreen.route) {
+
+                                FloatingActionButton(
+                                    onClick = { /*TODO*/ },
+                                    backgroundColor = Grey700,
+                                    modifier = Modifier.size(68.dp)
+                                ) {
+                                    Icon(
+                                        painter = painterResource(id = R.drawable.state_icon),
+                                        contentDescription = "Check",
+                                        tint = Color.White,
+                                        modifier = Modifier.size(48.dp)
+                                    )
+                                }
+                            }
+                        },
+                        floatingActionButtonPosition = FabPosition.Center,
+                        isFloatingActionButtonDocked = true,
+                        modifier = Modifier.fillMaxSize()
                     ) {
                         NavHost(
                             navController = navController,
@@ -64,7 +91,7 @@ class MainActivity : ComponentActivity() {
                             }
 
                             composable(Screen.HomeScreen.route) {
-                                Text(text = "Home")
+                                HomeScreen(navController = navController)
                             }
                             composable(Screen.AttendanceScreen.route) {
                                 Text(text = "Attendance")

@@ -34,7 +34,7 @@ sealed class BottomNavigationItem(
 
     object Announcement : BottomNavigationItem(
         route = Screen.AnnouncementScreen.route,
-        title = "Announcement",
+        title = "Notification",
         icon = Icons.Outlined.Notifications,
         selectedIcon = Icons.Filled.Notifications
     )

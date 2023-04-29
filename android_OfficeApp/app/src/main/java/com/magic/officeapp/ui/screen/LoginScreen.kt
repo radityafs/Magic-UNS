@@ -25,6 +25,7 @@ import androidx.navigation.compose.rememberNavController
 import com.magic.officeapp.ui.component.CustomButton
 import com.magic.officeapp.ui.component.TextInput
 import com.magic.officeapp.R
+import com.magic.officeapp.ui.navigation.Screen
 import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
@@ -128,7 +129,9 @@ fun LoginScreen(
             Row(modifier = Modifier.fillMaxWidth()) {
                 CustomButton(
                     text = "Login",
-                    onClick = {},
+                    onClick = {
+                        navController.navigate(Screen.HomeScreen.route)
+                    },
                     modifier = Modifier
                         .padding(top = 30.dp)
                         .fillMaxWidth()
