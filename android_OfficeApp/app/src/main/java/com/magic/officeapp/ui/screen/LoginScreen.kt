@@ -107,7 +107,7 @@ fun LoginScreen(
                     label = "Password",
                     type = "password",
                     value = password,
-                    placeholder = "Enter your paspsword"
+                    placeholder = "Enter your password"
                 )
             }
 

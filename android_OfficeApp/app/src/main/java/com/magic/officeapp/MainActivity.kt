@@ -4,12 +4,9 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -23,11 +20,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.magic.officeapp.ui.component.BottomNavigationBar
 import com.magic.officeapp.ui.navigation.Screen
-import com.magic.officeapp.ui.screen.HomeScreen
-import com.magic.officeapp.ui.screen.LoginScreen
-import com.magic.officeapp.ui.screen.ProfileScreen
-import com.magic.officeapp.ui.screen.SplashScreen
-import com.magic.officeapp.ui.theme.Grey600
+import com.magic.officeapp.ui.screen.*
 import com.magic.officeapp.ui.theme.Grey700
 import com.magic.officeapp.ui.theme.OfficeAppTheme
 import com.magic.officeapp.ui.viewmodel.AuthViewModel
@@ -53,12 +46,12 @@ class MainActivity : ComponentActivity() {
 
                     Scaffold(
                         bottomBar = {
-                            if (currentRoute != Screen.LoginScreen.route && currentRoute != Screen.SplashScreen.route && currentRoute != Screen.ProfileScreen.route) {
+                            if (currentRoute == Screen.HomeScreen.route || currentRoute == Screen.AnnouncementScreen.route) {
                                 BottomNavigationBar(navController = navController)
                             }
                         },
                         floatingActionButton = {
-                            if (currentRoute != Screen.LoginScreen.route && currentRoute != Screen.SplashScreen.route && currentRoute != Screen.ProfileScreen.route) {
+                            if (currentRoute == Screen.HomeScreen.route ||  currentRoute == Screen.AnnouncementScreen.route) {
 
                                 FloatingActionButton(
                                     onClick = { /*TODO*/ },
@@ -82,26 +75,36 @@ class MainActivity : ComponentActivity() {
                             navController = navController,
                             startDestination = if (isLogged) Screen.HomeScreen.route else Screen.SplashScreen.route
                         ) {
-
                             composable(Screen.SplashScreen.route) {
                                 SplashScreen(navController = navController)
                             }
-
                             composable(Screen.LoginScreen.route) {
                                 LoginScreen(navController = navController)
                             }
-
                             composable(Screen.HomeScreen.route) {
                                 HomeScreen(navController = navController)
                             }
                             composable(Screen.AttendanceScreen.route) {
-                                Text(text = "Attendance")
+                                AttendanceScreen(navController = navController)
+                            }
+                            composable(Screen.RequestScreen.route) {
+                                RequestScreen(navController = navController)
+                            }
+                            composable(Screen.RequestFormScreen.route) {
+                                RequestFormScreen(navController = navController)
+                            }
+
+                            composable(Screen.PayrollScreen.route) {
+                                PayrollScreen(navController = navController)
+                            }
+
+                            composable(Screen.PayrollDetailScreen.route) {
+                                PayrollDetailScreen(navController = navController)
                             }
 
                             composable(Screen.AnnouncementScreen.route) {
-                                Text(text = "Announcement")
+                                AnnouncementScreen(navController = navController)
                             }
-
                             composable(Screen.ProfileScreen.route) {
                                 ProfileScreen(navController = navController)
                             }

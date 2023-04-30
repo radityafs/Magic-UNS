@@ -122,7 +122,9 @@ fun HomeScreen(
                     .border(1.dp, Color("#F0F1F3".toColorInt()), RoundedCornerShape(8.dp))
                     .fillMaxWidth()
             ) {
-                Menu()
+                Menu(
+                    navController = navController,
+                )
             }
 
             Column(

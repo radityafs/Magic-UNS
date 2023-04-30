@@ -4,20 +4,12 @@ import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -124,21 +116,23 @@ fun ProfileScreen(
                     )
                     .clickable {}
                 ) {
-                    Row {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxSize(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
                         Image(
                             painter = painterResource(id = R.drawable.lock_icon),
                             contentDescription = "Lock Icon",
                             modifier = Modifier
-                                .height(48.dp)
-                                .offset(x = 4.dp, y = 3.dp)
+                                .padding(start = 12.dp , end = 8.dp)
+                                .size(40.dp)
                         )
 
                         Text(
-                            "Chnage passowrd",
+                            "Change Password",
                             fontSize = 14.sp,
                             fontWeight = FontWeight.SemiBold,
-                            modifier = Modifier
-                                .padding(start = 8.dp, top = 15.dp)
                         )
                         Spacer(modifier = Modifier.weight(1f))
 
@@ -146,8 +140,7 @@ fun ProfileScreen(
                             painter = painterResource(id = R.drawable.right_icon),
                             contentDescription = "Lock Icon",
                             modifier = Modifier
-                                .height(48.dp)
-                                .padding(end = 4.dp, top = 3.dp)
+                                .size(48.dp)
                         )
                     }
                 }
@@ -163,13 +156,18 @@ fun ProfileScreen(
                     )
                     .clickable {}
                 ) {
-                    Row {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxSize(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
                         Image(
                             painter = painterResource(id = R.drawable.logout_icon),
                             contentDescription = "Logout Icon",
                             modifier = Modifier
-                                .height(48.dp)
-                                .offset(x = 4.dp, y = 3.dp)
+                                .padding(start = 12.dp , end = 8.dp)
+                                .size(40.dp)
+
                         )
 
                         Text(
@@ -177,7 +175,6 @@ fun ProfileScreen(
                             fontSize = 14.sp,
                             fontWeight = FontWeight.SemiBold,
                             modifier = Modifier
-                                .padding(start = 8.dp, top = 15.dp)
                         )
                         Spacer(modifier = Modifier.weight(1f))
 
@@ -185,8 +182,7 @@ fun ProfileScreen(
                             painter = painterResource(id = R.drawable.right_icon),
                             contentDescription = "Lock Icon",
                             modifier = Modifier
-                                .height(48.dp)
-                                .padding(end = 4.dp, top = 3.dp)
+                                .size(48.dp)
                         )
                     }
                 }

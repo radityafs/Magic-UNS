@@ -11,17 +11,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.toColorInt
+import androidx.navigation.NavController
 import com.magic.officeapp.R
+import com.magic.officeapp.ui.navigation.Screen
 import com.magic.officeapp.ui.theme.Green100
 import com.magic.officeapp.ui.theme.Red100
 import com.magic.officeapp.ui.theme.Yellow100
 
 @Composable
 fun Menu(
-//    navController: NavController
+    navController: NavController
 ) {
     Row(
         modifier = Modifier
@@ -35,7 +38,7 @@ fun Menu(
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.clickable {
-
+                navController.navigate(Screen.RequestScreen.route)
             }
         ) {
             CustomIcon(
@@ -52,7 +55,7 @@ fun Menu(
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.clickable {
-
+                navController.navigate(Screen.AttendanceScreen.route)
             }
         ) {
             CustomIcon(
@@ -69,7 +72,7 @@ fun Menu(
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.clickable {
-
+                navController.navigate(Screen.PayrollScreen.route)
             }
         ) {
             CustomIcon(
@@ -81,13 +84,11 @@ fun Menu(
 
             Text(text = "Payroll", modifier = Modifier.padding(top = 4.dp), color = Color("#667085".toColorInt()))
         }
-
-
     }
 }
 
 @Preview(showBackground = true)
 @Composable
 fun MenuPreview() {
-    Menu()
+    Menu(navController = NavController(LocalContext.current))
 }
