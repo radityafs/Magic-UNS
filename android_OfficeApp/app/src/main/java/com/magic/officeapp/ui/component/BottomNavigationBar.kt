@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.magic.officeapp.ui.navigation.BottomNavigationItem
 
@@ -39,9 +40,13 @@ fun BottomNavigationBar(
                     },
                     selected = currentRoute == item.route,
                     onClick = {
-                        if (currentRoute != item.route) navController.navigate(
-                            item.route
-                        )
+                        navController.navigate(item.route) {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            restoreState = true
+                            launchSingleTop = true
+                        }
                     },
                     label = {
                         Text(text = item.title)

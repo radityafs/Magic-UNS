@@ -78,11 +78,7 @@ fun SplashScreen(
                 Row(modifier = Modifier.fillMaxWidth()) {
                     Button(
                         onClick = {
-                            navController.navigate(Screen.LoginScreen.route) {
-                                popUpTo(Screen.SplashScreen.route) {
-                                    inclusive = true
-                                }
-                            }
+                            navController.navigate(Screen.LoginScreen.route)
                         },
                         modifier = Modifier
                             .padding(top = 25.dp)

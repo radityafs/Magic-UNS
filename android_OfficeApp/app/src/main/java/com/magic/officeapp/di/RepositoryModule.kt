@@ -4,7 +4,12 @@ import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
+import com.magic.officeapp.data.api.ApiAttendanceInterface
+import com.magic.officeapp.data.api.ApiAuthInterface
+import com.magic.officeapp.data.api.ApiEmployeeInterface
+import com.magic.officeapp.data.repository.AttendanceRepository
 import com.magic.officeapp.data.repository.AuthRepository
+import com.magic.officeapp.data.repository.EmployeeRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -23,9 +28,25 @@ object RepositoryModule {
     @Provides
     @Singleton
     fun provideAuthRepository(
-        @ApplicationContext context: Context
+        @ApplicationContext context: Context, ApiAuthInterface: ApiAuthInterface
     ): AuthRepository {
-        return AuthRepository(context.userDataStore)
+        return AuthRepository(context.userDataStore, ApiAuthInterface)
+    }
+
+    @Provides
+    @Singleton
+    fun provideAttendanceRepository(
+        apiAttendanceInterface: ApiAttendanceInterface
+    ): AttendanceRepository {
+        return AttendanceRepository(apiAttendanceInterface)
+    }
+
+    @Provides
+    @Singleton
+    fun provideEmployeeRepository(
+        ApiEmployeeInterface: ApiEmployeeInterface
+    ): EmployeeRepository {
+        return EmployeeRepository(ApiEmployeeInterface)
     }
 
 }

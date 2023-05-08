@@ -17,7 +17,6 @@ sealed class BottomNavigationItem(
     val icon: ImageVector,
     val selectedIcon: ImageVector
 ) {
-
     object Home : BottomNavigationItem(
         route = Screen.HomeScreen.route,
         title = "Home",

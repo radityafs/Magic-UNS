@@ -1,4 +1,4 @@
-package com.magic.officeapp.ui.screen
+package com.magic.officeapp.ui.screen.employee
 
 import android.app.DatePickerDialog
 import android.widget.DatePicker

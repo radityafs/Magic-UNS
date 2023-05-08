@@ -1,6 +1,5 @@
-package com.magic.officeapp.ui.screen
+package com.magic.officeapp.ui.screen.employee
 
-import android.widget.Space
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn

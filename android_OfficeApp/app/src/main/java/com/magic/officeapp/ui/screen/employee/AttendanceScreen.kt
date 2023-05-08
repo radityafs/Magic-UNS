@@ -1,9 +1,11 @@
-package com.magic.officeapp.ui.screen
+package com.magic.officeapp.ui.screen.employee
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Divider
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -12,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
@@ -22,17 +25,14 @@ import com.magic.officeapp.ui.component.CustomButton
 import com.magic.officeapp.ui.component.CustomCard
 
 @Composable
-fun PayrollScreen(
+fun AttendanceScreen(
     navController: NavController = rememberNavController(),
 ) {
-
-
     LazyColumn(
         modifier = Modifier
             .padding(start = 24.dp, end = 24.dp)
             .fillMaxSize()
     ) {
-
         item {
             Row(
                 modifier = Modifier
@@ -49,26 +49,74 @@ fun PayrollScreen(
                 )
 
                 Text(
-                    text = "Payroll",
+                    text = "Attendance",
                     fontSize = 20.sp,
                     fontWeight = FontWeight.SemiBold,
                     modifier = Modifier.padding(start = 8.dp)
                 )
             }
-
-            Spacer(modifier = Modifier.height(40.dp))
         }
-
         item {
-            Image(
-                painter = painterResource(id = R.drawable.payroll_animation),
-                contentDescription = "Payroll Animation",
+            Row(
                 modifier = Modifier
+                    .padding(top = 40.dp)
                     .fillMaxWidth()
-                    .height(200.dp)
-            )
-        }
+                    .border(1.dp, Color("#E5E5E5".toColorInt()), RoundedCornerShape(6.dp))
+                    .padding(top = 21.dp, bottom = 21.dp, start = 16.dp, end = 16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column(
+                    modifier = Modifier.weight(1f),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "12",
+                        fontSize = 32.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color("#37A345".toColorInt())
+                    )
+                    Text(
+                        text = "Present",
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color("#858D9D".toColorInt())                    )
+                }
 
+                Column(
+                    modifier = Modifier.weight(1f),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "5",
+                        fontSize = 32.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color("#E5B200".toColorInt())
+                    )
+                    Text(
+                        text = "Absent",
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color("#858D9D".toColorInt())                    )
+                }
+
+                Column(
+                    modifier = Modifier.weight(1f),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "12",
+                        fontSize = 32.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color("#D3221E".toColorInt())
+                    )
+                    Text(
+                        text = "Leave",
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color("#858D9D".toColorInt())                    )
+                }
+            }
+        }
         item {
             Row(
                 modifier = Modifier
@@ -108,17 +156,20 @@ fun PayrollScreen(
                     onClick = {})
 
                 Divider(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(1.dp),
+                    modifier = Modifier.fillMaxWidth().height(1.dp),
                     color = Color("#F0F1F3".toColorInt())
                 )
             }
         }
 
-        item {
+        item{
             Spacer(modifier = Modifier.padding(bottom = 100.dp))
         }
-
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun AttendanceScreenPreview() {
+    AttendanceScreen()
 }

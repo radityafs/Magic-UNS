@@ -1,4 +1,4 @@
-package com.magic.officeapp.ui.screen
+package com.magic.officeapp.ui.screen.employee
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
@@ -167,7 +167,7 @@ fun RequestScreen(
 
             }
 
-            items(4, key = { index -> index }) { index ->
+            items(10, key = { index -> index }) { index ->
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
