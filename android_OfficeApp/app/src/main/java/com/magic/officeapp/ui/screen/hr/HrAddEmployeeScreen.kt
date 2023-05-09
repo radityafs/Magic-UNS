@@ -17,7 +17,7 @@ import androidx.navigation.compose.rememberNavController
 import com.magic.officeapp.R
 
 @Composable
-fun AddEmployeeScreen(
+fun HrAddEmployeeScreen(
     navController: NavController = rememberNavController(),
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
@@ -49,5 +49,5 @@ fun AddEmployeeScreen(
 @Preview(showBackground = true)
 @Composable
 fun AddEmployeeScreenPreview() {
-    AddEmployeeScreen()
+    HrAddEmployeeScreen()
 }

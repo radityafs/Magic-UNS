@@ -35,6 +35,7 @@ fun TextInput(
     placeholder: String = "",
     enabled: Boolean = true,
     type: String = "text",
+    leadingIcon: @Composable (() -> Unit)? = null,
     isValid: (Boolean) -> Unit = { },
 ) {
 
@@ -102,6 +103,7 @@ fun TextInput(
                 "number" -> KeyboardOptions(keyboardType = KeyboardType.Number)
                 else -> KeyboardOptions(keyboardType = KeyboardType.Text)
             },
+            leadingIcon = leadingIcon,
             trailingIcon = if (type == "password") {
                 {
                     val image = if (textVisible.value) R.drawable.baseline_visibility_24

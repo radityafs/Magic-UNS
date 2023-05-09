@@ -16,9 +16,10 @@ sealed class Screen(val route: String) {
     object PayrollScreen : Screen("payroll_screen")
     object PayrollDetailScreen : Screen("payroll_detail_screen")
 
-    // Admin
-    object AdminHomeScreen : Screen("admin_home_screen")
-    object AdminAttendanceScreen : Screen("admin_attendance_screen")
-    object AdminAnnouncementScreen : Screen("admin_announcement_screen")
+    // Hr
+    object HrHomeScreen : Screen("hr_home_screen")
+    object HrAttendanceScreen : Screen("hr_attendance_screen")
+    object HrAnnouncementScreen : Screen("hr_announcement_screen")
+    object HrAnnouncementFormScreen : Screen("hr_announcement_form_screen")
 
 }

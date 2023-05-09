@@ -31,12 +31,11 @@ import com.magic.officeapp.ui.component.TextInput
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import com.magic.officeapp.ui.component.CustomButton
-import com.magic.officeapp.ui.navigation.Screen
 import java.util.Calendar
 import java.util.Date
 
 @Composable
-fun AnnouncementFormScreen(
+fun HrAnnouncementFormScreen(
     navController: NavController = rememberNavController()
 ) {
     var (title, setTitle) = remember { mutableStateOf("") }
@@ -161,8 +160,8 @@ fun AnnouncementFormScreen(
     }
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
-fun AnnouncementFormScreenPreview() {
-    AnnouncementFormScreen()
+fun HrAnnouncementFormScreenPreview() {
+    HrAnnouncementFormScreen()
 }

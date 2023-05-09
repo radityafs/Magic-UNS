@@ -1,7 +1,6 @@
 package com.magic.officeapp.ui.screen.hr
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -12,7 +11,6 @@ import androidx.compose.material.Card
 import androidx.compose.material.Divider
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -23,29 +21,18 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.magic.officeapp.R
 import com.magic.officeapp.ui.component.CustomCard
 import com.magic.officeapp.ui.component.CustomIcon
-import com.magic.officeapp.ui.component.Menu
 import com.magic.officeapp.ui.navigation.Screen
 import com.magic.officeapp.ui.theme.Green100
 import com.magic.officeapp.ui.theme.Grey100
-import com.magic.officeapp.ui.theme.Grey700
-import com.magic.officeapp.ui.theme.Grey800
-import com.magic.officeapp.ui.theme.Purple100
 import com.magic.officeapp.ui.theme.Red100
-import com.magic.officeapp.ui.theme.Yellow100
-import com.magic.officeapp.ui.theme.Purple200
-import com.magic.officeapp.ui.viewmodel.AuthViewModel
-import java.sql.Time
-import java.text.SimpleDateFormat
-import java.util.*
 
 @Composable
-fun HomeScreen(
+fun HrHomeScreen(
     navController: NavController = rememberNavController(),
 //    viewModel: AuthViewModel = hiltViewModel()
 ) {
@@ -253,7 +240,7 @@ fun HomeScreen(
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier.clickable {
-                            navController.navigate(Screen.AdminAnnouncementFormScreen.route)
+                            navController.navigate(Screen.HrAnnouncementScreen.route)
                         }
                     ) {
                         CustomIcon(
@@ -419,5 +406,5 @@ fun HomeScreen(
 @Preview(showBackground = true)
 @Composable
 fun HomeScreenPreview() {
-    HomeScreen()
+    HrHomeScreen()
 }

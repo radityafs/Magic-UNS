@@ -1,9 +1,7 @@
 package com.magic.officeapp
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -15,7 +13,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -31,11 +28,8 @@ import com.magic.officeapp.ui.theme.OfficeAppTheme
 import com.magic.officeapp.ui.viewmodel.AuthViewModel
 import com.magic.officeapp.utils.hasLocationPermission
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.onEach
-import java.text.SimpleDateFormat
 import java.util.*
-
+import com.magic.officeapp.ui.screen.hr.*
 
 @AndroidEntryPoint
 @SuppressLint("MissingPermission")
@@ -64,6 +58,11 @@ class MainActivity : ComponentActivity() {
                                         val lat = location.latitude
                                         val long = location.longitude
 
+                                        Toast.makeText(
+                                            this,
+                                            "Lat: $lat, Long: $long",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
                                     } else {
                                         Toast.makeText(
                                             this, "Please turn on your location", Toast.LENGTH_SHORT
@@ -119,7 +118,7 @@ class MainActivity : ComponentActivity() {
                             startDestination = if (loading) Screen.LoadingScreen.route else if (isLogged) Screen.HomeScreen.route else Screen.SplashScreen.route
                         ) {
                             composable(Screen.HomeScreen.route) {
-                                HomeScreen(navController = navController)
+                                HrHomeScreen(navController = navController)
                             }
 
                             composable(Screen.LoadingScreen.route) {
@@ -156,6 +155,14 @@ class MainActivity : ComponentActivity() {
                             }
                             composable(Screen.ProfileScreen.route) {
                                 ProfileScreen(navController = navController)
+                            }
+
+                            composable(Screen.HrAnnouncementScreen.route) {
+                                HrAnnouncementScreen(navController = navController)
+                            }
+
+                            composable(Screen.HrAnnouncementFormScreen.route) {
+                                HrAnnouncementFormScreen(navController = navController)
                             }
                         }
                     }
