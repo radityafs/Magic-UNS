@@ -17,41 +17,46 @@ import com.magic.officeapp.ui.navigation.BottomNavigationItem
 
 @Composable
 fun BottomNavigationBar(
-    navController: NavController
+    navController: NavController, isHR: Boolean = false
 ) {
     val primaryColor = Color.Black
 
-    val items = listOf(
-        BottomNavigationItem.Home,
-        BottomNavigationItem.Attendance,
-        BottomNavigationItem.Announcement,
-    )
+    val items = if (isHR) {
+        listOf(
+            BottomNavigationItem.Home,
+            BottomNavigationItem.Attendance,
+            BottomNavigationItem.Announcement,
+        )
+    } else {
+        listOf(
+            BottomNavigationItem.Home,
+            BottomNavigationItem.Attendance,
+            BottomNavigationItem.Announcement,
+        )
+    }
 
     BottomNavigation(backgroundColor = Color.White, contentColor = primaryColor) {
         val navBackStackEntry by navController.currentBackStackEntryAsState()
         val currentRoute = navBackStackEntry?.destination?.route
         items.forEachIndexed { index, item ->
             if (index != 1) {
-                BottomNavigationItem(
-                    icon = {
-                        Icon(imageVector = currentRoute?.let {
-                            if (currentRoute == item.route) item.selectedIcon else item.icon
-                        } ?: item.icon, contentDescription = item.title, modifier = Modifier.size(24.dp))
-                    },
-                    selected = currentRoute == item.route,
-                    onClick = {
-                        navController.navigate(item.route) {
-                            popUpTo(navController.graph.findStartDestination().id) {
-                                saveState = true
-                            }
-                            restoreState = true
-                            launchSingleTop = true
+                BottomNavigationItem(icon = {
+                    Icon(imageVector = currentRoute?.let {
+                        if (currentRoute == item.route) item.selectedIcon else item.icon
+                    } ?: item.icon,
+                        contentDescription = item.title,
+                        modifier = Modifier.size(24.dp))
+                }, selected = currentRoute == item.route, onClick = {
+                    navController.navigate(item.route) {
+                        popUpTo(navController.graph.findStartDestination().id) {
+                            saveState = true
                         }
-                    },
-                    label = {
-                        Text(text = item.title)
+                        restoreState = true
+                        launchSingleTop = true
                     }
-                    )
+                }, label = {
+                    Text(text = item.title)
+                })
             }
         }
     }

@@ -18,7 +18,7 @@ data class Pagination(
 ) : Parcelable
 
 @Parcelize
-data class User(
+data class AttendanceResponseUser(
 	val data: Data? = null
 ) : Parcelable
 
@@ -44,7 +44,7 @@ data class Attributes(
 	val createdAt: String? = null,
 	val publishedAt: String? = null,
 	val latitude: String? = null,
-	val user: User? = null,
+	val user: AttendanceResponseUser? = null,
 	val updatedAt: String? = null,
 	val longitude: String? = null,
 	val jobRole: String? = null,

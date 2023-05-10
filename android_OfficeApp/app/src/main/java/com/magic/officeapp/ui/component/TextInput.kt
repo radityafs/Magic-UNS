@@ -18,11 +18,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
 import com.magic.officeapp.R
 
@@ -62,6 +64,8 @@ fun TextInput(
 
         if (label != null) {
             Text(
+                fontWeight = FontWeight.Bold,
+                fontSize = 14.sp,
                 modifier = Modifier
                     .padding(bottom = 18.dp)
                     .fillMaxWidth(),
@@ -76,7 +80,7 @@ fun TextInput(
                 shape = RoundedCornerShape(10.dp)
             ) ?: Modifier
                 .fillMaxWidth()
-                .height(50.dp)
+                .height(56.dp)
                 .clip(RoundedCornerShape(10.dp))
                 .border(
                     width = 1.dp,

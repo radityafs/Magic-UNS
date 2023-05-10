@@ -2,28 +2,40 @@ package com.magic.officeapp.data.api
 
 import com.magic.officeapp.data.model.request.AttendanceRequest
 import com.magic.officeapp.data.model.response.AttendanceResponse
+import com.magic.officeapp.data.model.response.LocationResponse
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface ApiAttendanceInterface {
-    @GET("/api/attendances/?populate=user&sort=publishedAt:desc&pagination[pageSize]=100")
-    suspend fun getAttendance(): List<AttendanceResponse>
 
-    @GET("/api/attendances/?populate=user&filters[publishedAt][\$gte]={startDate}&filters[publishedAt][\$lte]={endDate}&sort=publishedAt:desc&pagination[pageSize]=100")
-    suspend fun getAttendanceByRange(
-        startDate: String, endDate: String
-    ): List<AttendanceResponse>
+    @GET("/api/location")
+    suspend fun getApiLocation(): LocationResponse
+
+    @GET("/api/attendances/?populate=user&sort=publishedAt:desc&pagination[pageSize]=100")
+    suspend fun getAttendance(): AttendanceResponse
+
+//    @GET("/api/attendances/?populate=user&filters[publishedAt][\$gte]={startDate}&filters[publishedAt][\$lte]={endDate}&sort=publishedAt:desc&pagination[pageSize]=100")
+//    suspend fun getAttendanceByRange(
+//        startDate: String, endDate: String
+//    ): AttendanceResponse
 
     @GET("/api/attendances/?populate=user&filters[user][id][\$eq]={userId}&sort=publishedAt:desc&pagination[pageSize]=100")
     suspend fun getAttendance(
         userId: String
-    ): List<AttendanceResponse>
+    ): AttendanceResponse
 
-    @GET("/api/attendances/?populate=user&filters[user][id][\$eq]={userId}&filters[publishedAt][\$gte]={startDate}&filters[publishedAt][\$lte]={endDate}&sort=publishedAt:desc&pagination[pageSize]=100")
+    @GET("/api/attendances")
     suspend fun getAttendanceByRange(
-        userId: String, startDate: String, endDate: String
-    ): List<AttendanceResponse>
+        @Query("populate") populate: String = "user",
+        @Query("filters[user][id][\$eq]") userId: String,
+        @Query("filters[publishedAt][\$gte]") startDate: String,
+        @Query("filters[publishedAt][\$lte]") endDate: String,
+        @Query("sort") sort: String = "publishedAt:desc",
+        @Query("pagination[pageSize]") pageSize: Int = 100
+    ): AttendanceResponse
 
     @POST("/api/attendances")
     suspend fun postAttendance(

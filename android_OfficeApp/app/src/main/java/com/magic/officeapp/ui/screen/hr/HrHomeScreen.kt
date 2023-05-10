@@ -11,6 +11,7 @@ import androidx.compose.material.Card
 import androidx.compose.material.Divider
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -21,6 +22,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.magic.officeapp.R
@@ -30,34 +32,48 @@ import com.magic.officeapp.ui.navigation.Screen
 import com.magic.officeapp.ui.theme.Green100
 import com.magic.officeapp.ui.theme.Grey100
 import com.magic.officeapp.ui.theme.Red100
+import com.magic.officeapp.ui.viewmodel.AuthViewModel
+import com.magic.officeapp.ui.viewmodel.EmployeeViewModel
+import java.sql.Time
+import java.text.SimpleDateFormat
+import com.magic.officeapp.utils.constants.Result
 
 @Composable
 fun HrHomeScreen(
     navController: NavController = rememberNavController(),
-//    viewModel: AuthViewModel = hiltViewModel()
+    authViewModel: AuthViewModel = hiltViewModel(),
+    employeeViewModel: EmployeeViewModel = hiltViewModel()
 ) {
+    val user = authViewModel.userData.collectAsState()
 
-//    val user = viewModel.userData.collectAsState()
-//    val currentHour = Time(System.currentTimeMillis()).hours
-//    fun greeting(
-//        username: String = "Employee",
-//    ): String {
-//        val userName = username.split(" ")[0]
-//        when (currentHour) {
-//            in 5..11 -> {
-//                return "Morning, $userName \uD83E\uDD1F\uD83C\uDFFB"
-//            }
-//            in 12..15 -> {
-//                return "Afternoon, $userName \uD83C\uDF1E"
-//            }
-//            in 16..20 -> {
-//                return "Evening, $userName \uD83C\uDF1A"
-//            }
-//        }
-//        return "Night, $userName \uD83C\uDF19"
-//    }
-//
-//    fun currentDate() = SimpleDateFormat("dd MMMM yyyy").format(Date())
+    if(user?.value?.jwt != null){
+        employeeViewModel.getEmployeeList(user.value?.jwt ?: "")
+    }
+
+    val loading = employeeViewModel.loading.collectAsState()
+    val employeeData = employeeViewModel.employeeData.collectAsState()
+
+    val currentHour = Time(System.currentTimeMillis()).hours
+
+    fun greeting(
+        username: String = "Employee",
+    ): String {
+        val userName = username.split(" ")[0]
+        when (currentHour) {
+            in 5..11 -> {
+                return "Morning, $userName \uD83E\uDD1F\uD83C\uDFFB"
+            }
+            in 12..15 -> {
+                return "Afternoon, $userName \uD83C\uDF1E"
+            }
+            in 16..20 -> {
+                return "Evening, $userName \uD83C\uDF1A"
+            }
+        }
+        return "Night, $userName \uD83C\uDF19"
+    }
+
+    fun currentDate() = SimpleDateFormat("dd MMMM yyyy").format(java.util.Date())
 
     LazyColumn(
         modifier = Modifier
@@ -77,9 +93,13 @@ fun HrHomeScreen(
                         verticalArrangement = Arrangement.SpaceAround
                     ) {
                         Text(
-                            text = "Hello, Employee", fontWeight = FontWeight.Bold, fontSize = 24.sp
+                            text = greeting(user.value?.username ?: "Employee"),
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 24.sp
                         )
-                        Text(text = "11 April 2023", modifier = Modifier.padding(top = 10.dp))
+                        Text(
+                            text = currentDate(), modifier = Modifier.padding(top = 10.dp)
+                        )
                     }
 
                     Image(painter = painterResource(id = R.drawable.profile),
@@ -153,7 +173,10 @@ fun HrHomeScreen(
                     modifier = Modifier
                         .height(108.dp)
                         .weight(1f)
-                        .padding(start = 6.dp),
+                        .padding(start = 6.dp)
+                        .clickable {
+                            navController.navigate(Screen.HREmployeeListScreen.route)
+                        },
                     backgroundColor = Color("#525A6A".toColorInt()),
                     shape = RoundedCornerShape(6.dp)
                 ) {
@@ -184,7 +207,7 @@ fun HrHomeScreen(
 
                         Row(modifier = Modifier.fillMaxWidth()) {
                             Text(
-                                "43",
+                                "${employeeData.value?.size}",
                                 fontSize = 40.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = Color.White
@@ -213,17 +236,16 @@ fun HrHomeScreen(
             ) {
                 Row(
                     modifier = Modifier
+                        .padding(16.dp)
                         .fillMaxWidth()
                         .height(100.dp),
                     horizontalArrangement = Arrangement.SpaceAround,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
+                    Column(horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier.clickable {
                             navController.navigate(Screen.AttendanceScreen.route)
-                        }
-                    ) {
+                        }) {
                         CustomIcon(
                             icon = R.drawable.attendance_icon,
                             contentDescription = "Request",
@@ -237,16 +259,14 @@ fun HrHomeScreen(
                             color = Color("#858D9D".toColorInt())
                         )
                     }
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
+                    Column(horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier.clickable {
                             navController.navigate(Screen.HrAnnouncementScreen.route)
-                        }
-                    ) {
+                        }) {
                         CustomIcon(
-                            icon = R.drawable.annouchment_icon,
+                            icon = R.drawable.icon_announcement,
                             contentDescription = "Announcement",
-                            backgroundColor = Color("#D1D5DB".toColorInt()),
+                            backgroundColor = Color("#F2E8FF".toColorInt()),
                             size = 48,
                         )
 
@@ -258,12 +278,10 @@ fun HrHomeScreen(
                     }
 
 
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
+                    Column(horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier.clickable {
                             navController.navigate(Screen.PayrollScreen.route)
-                        }
-                    ) {
+                        }) {
                         CustomIcon(
                             icon = R.drawable.payroll_icon,
                             contentDescription = "Payroll",
@@ -286,21 +304,18 @@ fun HrHomeScreen(
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
                         text = "Announcement", fontWeight = FontWeight.SemiBold, fontSize = 14.sp
                     )
-                    Text(
-                        text = "See more",
+                    Text(text = "See more",
                         fontWeight = FontWeight.Normal,
                         fontSize = 14.sp,
                         color = Color("#858D9D".toColorInt()),
-                        modifier = Modifier.clickable { }
-                    )
+                        modifier = Modifier.clickable { })
                 }
 
                 Card(
@@ -365,13 +380,11 @@ fun HrHomeScreen(
                     Text(
                         text = "Recent Activity", fontWeight = FontWeight.SemiBold, fontSize = 14.sp
                     )
-                    Text(
-                        text = "See more",
+                    Text(text = "See more",
                         fontWeight = FontWeight.Normal,
                         fontSize = 14.sp,
                         color = Color("#858D9D".toColorInt()),
-                        modifier = Modifier.clickable { }
-                    )
+                        modifier = Modifier.clickable { })
                 }
             }
 

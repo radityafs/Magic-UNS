@@ -43,7 +43,7 @@ fun LoginScreen(
     val (isValidPassword, setIsValidPassword) = remember { mutableStateOf(false) }
 
     val loading = viewModel.loading.collectAsState()
-    val loginResponse = viewModel.loginState.collectAsState()
+    val loginResponse = viewModel.loginDetail.collectAsState()
 
     fun login() {
         if (!isValidEmail || !isValidPassword || email.isEmpty() || password.isEmpty()) {
@@ -56,18 +56,23 @@ fun LoginScreen(
 
     when (loginResponse.value) {
         is Result.Success -> {
-            viewModel.saveUserData((loginResponse.value as Result.Success<LoginResponse>).data.user)
+            val dataLogin = (loginResponse.value as Result.Success).data
+            val currentRoute = navController.currentDestination?.route
 
-
-            if(navController.currentDestination?.route != Screen.HomeScreen.route) {
-                navController.navigate(Screen.HomeScreen.route){
-                    popUpTo(Screen.HomeScreen.route){
-                        inclusive = true
+            if (currentRoute == Screen.LoginScreen.route) {
+                if (dataLogin?.role?.name == "HR") {
+                    navController.navigate(Screen.HRHomeScreen.route) {
+                        popUpTo(Screen.LoginScreen.route) { inclusive = true }
+                    }
+                }else{
+                    navController.navigate(Screen.HomeScreen.route) {
+                        popUpTo(Screen.LoginScreen.route) { inclusive = true }
                     }
                 }
             }
         }
         is Result.Error -> {
+            Log.d("LoginScreen", "login: ${loginResponse.value}")
             Toast.makeText(
                 navController.context, "Password or Email is incorrect", Toast.LENGTH_SHORT
             ).show()
@@ -96,7 +101,6 @@ fun LoginScreen(
                         text = "Hi, Welcome Back! \uD83D\uDC4B",
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold,
-
                         )
                 }
 
@@ -115,8 +119,8 @@ fun LoginScreen(
 
                 Row(
                     modifier = Modifier
-                        .fillMaxWidth()
                         .padding(top = 35.dp)
+                        .fillMaxWidth()
                 ) {
                     TextInput(onValueChange = {
                         setEmail(it)
@@ -132,8 +136,8 @@ fun LoginScreen(
 
                 Row(
                     modifier = Modifier
-                        .fillMaxWidth()
                         .padding(top = 20.dp)
+                        .fillMaxWidth()
                 ) {
                     TextInput(
                         onValueChange = {

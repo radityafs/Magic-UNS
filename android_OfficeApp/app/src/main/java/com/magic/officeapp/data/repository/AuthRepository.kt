@@ -9,6 +9,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import com.magic.officeapp.data.api.ApiAuthInterface
 import com.magic.officeapp.data.model.LoginResponse
 import com.magic.officeapp.data.model.request.LoginRequest
+import com.magic.officeapp.data.model.response.DetailUserResponse
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
@@ -31,13 +32,25 @@ class AuthRepository @Inject constructor(
         }
     }
 
-    suspend fun getUserData(): User? {
+    suspend fun getDetails(
+        token : String
+    ): Result<DetailUserResponse> {
+        return try {
+            Result.Success(apiService.getDetails(
+                "Bearer $token"
+            ))
+        } catch (e: Exception) {
+            Result.Error(e.message.toString())
+        }
+    }
+
+    suspend fun getUserData(): DetailUserResponse? {
         return dataStore.data.map {
-            Gson().fromJson(it[userData], User::class.java)
+            Gson().fromJson(it[userData], DetailUserResponse::class.java)
         }.first()
     }
 
-    suspend fun saveUserData(user: User) {
+    suspend fun saveUserData(user: DetailUserResponse) {
         dataStore.edit {
             it[userData] = Gson().toJson(user)
         }

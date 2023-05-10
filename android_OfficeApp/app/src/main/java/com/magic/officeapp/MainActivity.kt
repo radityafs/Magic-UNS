@@ -1,6 +1,7 @@
 package com.magic.officeapp
 
 import android.annotation.SuppressLint
+import android.location.Location
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -19,17 +20,25 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.google.android.gms.location.LocationServices
+import com.magic.officeapp.data.model.response.AttendanceResponse
+import com.magic.officeapp.data.model.response.LocationResponse
 import com.magic.officeapp.ui.component.BottomNavigationBar
 import com.magic.officeapp.ui.navigation.Screen
 import com.magic.officeapp.ui.screen.*
 import com.magic.officeapp.ui.screen.employee.*
+import com.magic.officeapp.ui.screen.hr.HrAnnouncementFormScreen
+import com.magic.officeapp.ui.screen.hr.HrAnnouncementScreen
+import com.magic.officeapp.ui.screen.hr.HrEmployeeListScreen
+import com.magic.officeapp.ui.screen.hr.HrHomeScreen
 import com.magic.officeapp.ui.theme.Grey700
 import com.magic.officeapp.ui.theme.OfficeAppTheme
+import com.magic.officeapp.ui.viewmodel.AttendanceViewModel
 import com.magic.officeapp.ui.viewmodel.AuthViewModel
+import com.magic.officeapp.utils.constants.Result
 import com.magic.officeapp.utils.hasLocationPermission
 import dagger.hilt.android.AndroidEntryPoint
 import java.util.*
-import com.magic.officeapp.ui.screen.hr.*
+
 
 @AndroidEntryPoint
 @SuppressLint("MissingPermission")
@@ -44,24 +53,92 @@ class MainActivity : ComponentActivity() {
                     val navBackStackEntry by navController.currentBackStackEntryAsState()
                     val currentRoute = navBackStackEntry?.destination?.route
                     val authViewModel = hiltViewModel<AuthViewModel>(this)
+                    val attendanceViewModel = hiltViewModel<AttendanceViewModel>(this)
+
                     val user by authViewModel.userData.collectAsState()
                     val isLogged by authViewModel.isLogged.collectAsState()
-                    val loading by authViewModel.loading.collectAsState()
+                    val todayAttendance by attendanceViewModel.todayAttendance.collectAsState()
+                    val officeLocation by attendanceViewModel.location.collectAsState()
+                    val loadingAuthentication by authViewModel.loading.collectAsState()
+                    val loadingAttendance by attendanceViewModel.loading.collectAsState()
+
+                    if (isLogged && todayAttendance == Result.Empty) {
+                        attendanceViewModel.getAttendanceToday(user?.id.toString())
+                    }
+
+                    fun startDestination() : String {
+                        if (loadingAuthentication || loadingAttendance) {
+                            Screen.LoadingScreen.route
+                        }
+
+                        return if (isLogged) {
+                            if (user?.role?.name == "HR") {
+                                Screen.HRHomeScreen.route
+                            } else {
+                                Screen.HomeScreen.route
+                            }
+                        } else {
+                            Screen.SplashScreen.route
+                        }
+                    }
 
                     fun insertAttendance() {
-                        if (user?.job_role != "HR") {
+                        if (user?.role?.name != "HR") {
+                            if (loadingAttendance) {
+                                Toast.makeText(
+                                    this, "Please wait", Toast.LENGTH_SHORT
+                                ).show()
+                                return
+                            }
+
+                            val todayAttendance =
+                                todayAttendance as Result.Success<AttendanceResponse>
+                            val isCheckIn = todayAttendance.data.data?.isNotEmpty()!!
+
+                            if (isCheckIn) {
+                                Toast.makeText(
+                                    this, "You have checked in today", Toast.LENGTH_SHORT
+                                ).show()
+                                return
+                            }
+
                             if (hasLocationPermission()) {
                                 val fusedLocationClient =
                                     LocationServices.getFusedLocationProviderClient(this)
                                 fusedLocationClient.lastLocation.addOnSuccessListener { location ->
                                     if (location != null) {
-                                        val lat = location.latitude
-                                        val long = location.longitude
+                                        val dataOfficeLocation =
+                                            officeLocation as Result.Success<LocationResponse>
+                                        val officeLocation = Location(
+                                            "Office Location"
+                                        )
+
+                                        officeLocation.latitude =
+                                            dataOfficeLocation.data.data?.attributes?.latitude?.toDouble()!!
+                                        officeLocation.longitude =
+                                            dataOfficeLocation.data.data?.attributes?.longitude?.toDouble()!!
+
+                                        val distance =
+                                            location.distanceTo(officeLocation) // in meters
+
+                                        if (distance > 100) {
+                                            Toast.makeText(
+                                                this,
+                                                "You are not in the office area",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+
+                                            return@addOnSuccessListener
+                                        }
+
+                                        attendanceViewModel.insertAttendance(
+                                            user?.id.toString(),
+                                            location.latitude.toString(),
+                                            location.longitude.toString()
+                                        )
 
                                         Toast.makeText(
-                                            this,
-                                            "Lat: $lat, Long: $long",
-                                            Toast.LENGTH_SHORT
+                                            this, "Check in success", Toast.LENGTH_SHORT
                                         ).show()
                                     } else {
                                         Toast.makeText(
@@ -82,15 +159,18 @@ class MainActivity : ComponentActivity() {
                         }
                     }
 
-
                     Scaffold(
                         bottomBar = {
                             if (currentRoute == Screen.HomeScreen.route || currentRoute == Screen.AnnouncementScreen.route) {
                                 BottomNavigationBar(navController = navController)
                             }
+
+                            if(currentRoute == Screen.HRHomeScreen.route) {
+                                BottomNavigationBar(navController = navController)
+                            }
                         },
                         floatingActionButton = {
-                            if (user?.job_role != "HR") {
+                            if (user?.role?.name != "HR") {
                                 if (currentRoute == Screen.HomeScreen.route || currentRoute == Screen.AnnouncementScreen.route) {
                                     FloatingActionButton(
                                         onClick = {
@@ -115,21 +195,26 @@ class MainActivity : ComponentActivity() {
                     ) {
                         NavHost(
                             navController = navController,
-                            startDestination = if (loading) Screen.LoadingScreen.route else if (isLogged) Screen.HomeScreen.route else Screen.SplashScreen.route
+                            startDestination = startDestination()
                         ) {
-                            composable(Screen.HomeScreen.route) {
-                                HrHomeScreen(navController = navController)
+
+
+                            composable(Screen.SplashScreen.route) {
+                                SplashScreen(navController = navController)
                             }
 
                             composable(Screen.LoadingScreen.route) {
                                 LoadingScreen()
                             }
 
-                            composable(Screen.SplashScreen.route) {
-                                SplashScreen(navController = navController)
-                            }
+
                             composable(Screen.LoginScreen.route) {
                                 LoginScreen(navController = navController)
+                            }
+
+                            // USER
+                            composable(Screen.HomeScreen.route) {
+                                HomeScreen(navController = navController)
                             }
 
                             composable(Screen.AttendanceScreen.route) {
@@ -153,8 +238,15 @@ class MainActivity : ComponentActivity() {
                             composable(Screen.AnnouncementScreen.route) {
                                 AnnouncementScreen(navController = navController)
                             }
+
                             composable(Screen.ProfileScreen.route) {
                                 ProfileScreen(navController = navController)
+                            }
+
+
+                            // HR
+                            composable(Screen.HRHomeScreen.route) {
+                                HrHomeScreen(navController = navController)
                             }
 
                             composable(Screen.HrAnnouncementScreen.route) {
@@ -164,6 +256,15 @@ class MainActivity : ComponentActivity() {
                             composable(Screen.HrAnnouncementFormScreen.route) {
                                 HrAnnouncementFormScreen(navController = navController)
                             }
+
+                            composable(Screen.HREmployeeListScreen.route) {
+                                HrEmployeeListScreen(navController = navController)
+                            }
+
+                            composable(Screen.HRAddEmployeeScreen.route) {
+                                HrAddEmployeeScreen(navController = navController)
+                            }
+
                         }
                     }
                 }

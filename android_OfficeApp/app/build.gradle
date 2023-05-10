@@ -100,4 +100,8 @@ dependencies {
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.2'
 
+
+    // Material3
+    def material3_version = "1.0.1"
+    implementation "androidx.compose.material3:material3:$material3_version"
 }

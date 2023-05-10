@@ -29,6 +29,7 @@ import com.magic.officeapp.ui.component.Menu
 import com.magic.officeapp.ui.navigation.Screen
 import com.magic.officeapp.ui.theme.Grey700
 import com.magic.officeapp.ui.theme.Grey800
+import com.magic.officeapp.ui.viewmodel.AttendanceViewModel
 import com.magic.officeapp.ui.viewmodel.AuthViewModel
 import java.sql.Time
 import java.text.SimpleDateFormat
@@ -39,27 +40,24 @@ import java.util.Date
 @Composable
 fun HomeScreen(
     navController: NavController = rememberNavController(),
-    viewModel: AuthViewModel = hiltViewModel()
+    viewModel: AuthViewModel = hiltViewModel(),
+    viewModelAttendance: AttendanceViewModel = hiltViewModel(),
 ) {
     val user = viewModel.userData.collectAsState()
+
     val currentHour = Time(System.currentTimeMillis()).hours
     fun greeting(
         username: String = "Employee",
     ): String {
         val userName = username.split(" ")[0]
         when (currentHour) {
-            in 5..11 -> {
-                return "Morning, $userName \uD83E\uDD1F\uD83C\uDFFB"
-            }
-            in 12..15 -> {
-                return "Afternoon, $userName \uD83C\uDF1E"
-            }
-            in 16..20 -> {
-                return "Evening, $userName \uD83C\uDF1A"
-            }
+            in 5..11 -> "Morning, $userName \uD83E\uDD1F\uD83C\uDFFB"
+            in 12..15 -> "Afternoon, $userName \uD83C\uDF1E"
+            in 16..20 -> "Evening, $userName \uD83C\uDF1A"
         }
         return "Night, $userName \uD83C\uDF19"
     }
+
     fun currentDate() = SimpleDateFormat("dd MMMM yyyy").format(Date())
 
     LazyColumn(

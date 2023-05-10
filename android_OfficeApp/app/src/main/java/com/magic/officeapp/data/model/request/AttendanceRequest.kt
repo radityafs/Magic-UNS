@@ -4,10 +4,10 @@ import com.google.gson.annotations.SerializedName
 
 data class AttendanceRequest(
 	@field:SerializedName("data")
-	val data: Data? = null
+	val data: DataAttendanceRequest? = null
 )
 
-data class Data(
+data class DataAttendanceRequest(
 	@field:SerializedName("user")
 	val user: Int? = null,
 
