@@ -38,11 +38,18 @@ sealed class BottomNavigationItem(
         selectedIcon = Icons.Filled.Notifications
     )
 
-    object Profile : BottomNavigationItem(
-        route = Screen.ProfileScreen.route,
-        title = "Profile",
-        icon = Icons.Outlined.Person,
-        selectedIcon = Icons.Filled.Person
+    object HRHome : BottomNavigationItem(
+        route = Screen.HRHomeScreen.route,
+        title = "Home",
+        icon = Icons.Outlined.Home,
+        selectedIcon = Icons.Filled.Home
+    )
+
+    object HRAnnouncement : BottomNavigationItem(
+        route = Screen.HrAnnouncementScreen.route,
+        title = "Notification",
+        icon = Icons.Outlined.Notifications,
+        selectedIcon = Icons.Filled.Notifications
     )
 
 }

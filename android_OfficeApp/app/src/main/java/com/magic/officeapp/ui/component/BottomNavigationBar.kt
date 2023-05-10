@@ -23,9 +23,8 @@ fun BottomNavigationBar(
 
     val items = if (isHR) {
         listOf(
-            BottomNavigationItem.Home,
-            BottomNavigationItem.Attendance,
-            BottomNavigationItem.Announcement,
+            BottomNavigationItem.HRHome,
+            BottomNavigationItem.HRAnnouncement,
         )
     } else {
         listOf(
@@ -39,7 +38,7 @@ fun BottomNavigationBar(
         val navBackStackEntry by navController.currentBackStackEntryAsState()
         val currentRoute = navBackStackEntry?.destination?.route
         items.forEachIndexed { index, item ->
-            if (index != 1) {
+            if (index != 1 || isHR) {
                 BottomNavigationItem(icon = {
                     Icon(imageVector = currentRoute?.let {
                         if (currentRoute == item.route) item.selectedIcon else item.icon

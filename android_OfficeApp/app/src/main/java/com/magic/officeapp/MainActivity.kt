@@ -166,7 +166,7 @@ class MainActivity : ComponentActivity() {
                             }
 
                             if(currentRoute == Screen.HRHomeScreen.route) {
-                                BottomNavigationBar(navController = navController)
+                                BottomNavigationBar(navController = navController, isHR = true)
                             }
                         },
                         floatingActionButton = {
