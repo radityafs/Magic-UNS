@@ -4,9 +4,11 @@ import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
+import com.magic.officeapp.data.api.ApiAnnouncementInterface
 import com.magic.officeapp.data.api.ApiAttendanceInterface
 import com.magic.officeapp.data.api.ApiAuthInterface
 import com.magic.officeapp.data.api.ApiEmployeeInterface
+import com.magic.officeapp.data.repository.AnnouncementRepository
 import com.magic.officeapp.data.repository.AttendanceRepository
 import com.magic.officeapp.data.repository.AuthRepository
 import com.magic.officeapp.data.repository.EmployeeRepository
@@ -49,4 +51,11 @@ object RepositoryModule {
         return EmployeeRepository(ApiEmployeeInterface)
     }
 
+    @Provides
+    @Singleton
+    fun provideAnnouncementRepository(
+        ApiAnnouncementInterface: ApiAnnouncementInterface
+    ): AnnouncementRepository {
+        return AnnouncementRepository(ApiAnnouncementInterface)
+    }
 }

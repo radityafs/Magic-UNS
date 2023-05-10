@@ -1,5 +1,6 @@
 package com.magic.officeapp.di
 
+import com.magic.officeapp.data.api.ApiAnnouncementInterface
 import com.magic.officeapp.data.api.ApiAttendanceInterface
 import com.magic.officeapp.data.api.ApiAuthInterface
 import com.magic.officeapp.data.api.ApiEmployeeInterface
@@ -40,5 +41,10 @@ object AppModule {
         return retrofit.create(ApiEmployeeInterface::class.java)
     }
 
+    @Provides
+    @Singleton
+    fun apiAnnouncement(retrofit: Retrofit): ApiAnnouncementInterface {
+        return retrofit.create(ApiAnnouncementInterface::class.java)
+    }
 
 }

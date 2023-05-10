@@ -1,17 +1,20 @@
-package com.magic.officeapp.data.model.request
+package com.magic.officeapp.data.model.response
 
 import com.google.gson.annotations.SerializedName
 
 data class AddAnnouncementResponse(
 
 	@field:SerializedName("data")
-	val data: ResponseData? = null,
+	val data: AddAnnouncementData? = null,
 
 	@field:SerializedName("meta")
-	val meta: Meta? = null
+	val meta: AddAnnouncementMeta? = null
 )
 
-data class Attributes(
+data class AddAnnouncementAttributes(
+
+	@field:SerializedName("date")
+	val date: String? = null,
 
 	@field:SerializedName("createdAt")
 	val createdAt: String? = null,
@@ -20,24 +23,24 @@ data class Attributes(
 	val publishedAt: String? = null,
 
 	@field:SerializedName("description")
-	val description: Any? = null,
+	val description: String? = null,
 
 	@field:SerializedName("title")
-	val title: Any? = null,
+	val title: String? = null,
 
 	@field:SerializedName("updatedAt")
 	val updatedAt: String? = null
 )
 
-data class ResponseData(
+data class AddAnnouncementData(
 
 	@field:SerializedName("attributes")
-	val attributes: Attributes? = null,
+	val attributes: AddAnnouncementAttributes? = null,
 
 	@field:SerializedName("id")
 	val id: Int? = null
 )
 
-data class Meta(
+data class AddAnnouncementMeta(
 	val any: Any? = null
 )
