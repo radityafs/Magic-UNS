@@ -1,5 +1,6 @@
 package com.magic.officeapp.ui.screen.hr
 
+import Dropdown
 import android.app.DatePickerDialog
 import android.widget.DatePicker
 import android.widget.Toast
@@ -35,10 +36,15 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.magic.officeapp.data.model.LoginResponse
+import com.magic.officeapp.data.model.response.AddAnnouncementResponse
+import com.magic.officeapp.data.model.response.JobRolesResponse
 import com.magic.officeapp.ui.component.CustomButton
 import com.magic.officeapp.ui.navigation.Screen
 import com.magic.officeapp.ui.viewmodel.AnnouncementViewModel
+import com.magic.officeapp.ui.viewmodel.AuthViewModel
+import com.magic.officeapp.ui.viewmodel.EmployeeViewModel
 import com.magic.officeapp.utils.constants.Result
+import itemDropdown
 import java.time.LocalDateTime
 import java.util.Calendar
 import java.util.Date
@@ -46,24 +52,38 @@ import java.util.Date
 @Composable
 fun HrAnnouncementFormScreen(
     navController: NavController = rememberNavController(),
-    viewModel: AnnouncementViewModel = hiltViewModel()
+    authViewModel: AuthViewModel = hiltViewModel(),
+    announcementViewModel: AnnouncementViewModel = hiltViewModel(),
+    employeeViewModel: EmployeeViewModel = hiltViewModel()
 ) {
     var (title, setTitle) = remember { mutableStateOf("") }
     var (description, setDescription) = remember { mutableStateOf("") }
     var (date, setDate) = remember { mutableStateOf("") }
-    var (role, setRole) = remember { mutableStateOf(0) }
+    val (role, setRole) = remember { mutableStateOf("") }
+    val (roleId, setRoleId) = remember { mutableStateOf(0) }
 
-    var loading = viewModel.loading.collectAsState()
-    var announcementResponse = viewModel.addAnnouncementState.collectAsState()
+    //Validation
+    var (isTitleValid, setTitleValid) = remember { mutableStateOf(false) }
+    val (isDescriptionValid, setDescriptionValid) = remember { mutableStateOf(false) }
+
+    val user = authViewModel.userData.collectAsState()
+    if (user.value?.jwt != null) {
+        employeeViewModel.getJobRoles(user?.value?.jwt!!)
+    }
+
+    val jobRoles = employeeViewModel.jobRolesData.collectAsState()
+
+    var announcementResponse = announcementViewModel.addAnnouncementState.collectAsState()
 
     fun addAnnouncement() {
-        if (title.isEmpty() || description.isEmpty()) {
+        if (!isTitleValid || !isDescriptionValid || date.isEmpty() || role.isEmpty()) {
             Toast.makeText(navController.context, "Please fill all the fields", Toast.LENGTH_SHORT)
                 .show()
         } else {
-            viewModel.addAnnouncement(title, description, date, role, 1)
+            announcementViewModel.addAnnouncement(title, description, date, roleId, 1)
         }
     }
+
     when (announcementResponse.value) {
         is Result.Success -> {
             if (navController.currentDestination?.route != Screen.HrAnnouncementScreen.route) {
@@ -74,144 +94,157 @@ fun HrAnnouncementFormScreen(
                 }
             }
         }
-
         is Result.Error -> {
+            val error = (announcementResponse.value as Result.Error)
             Toast.makeText(
-                navController.context, announcementResponse.toString(), Toast.LENGTH_SHORT
+                navController.context, error.message, Toast.LENGTH_SHORT
             ).show()
         }
-
-        else -> {
-            Toast.makeText(
-                navController.context, announcementResponse.toString(), Toast.LENGTH_SHORT
-            ).show()
-        }
-}
+        else -> {}
+    }
 
 // date picker dialog
-val mContext = LocalContext.current
-val mYear: Int
-val mMonth: Int
-val mDay: Int
+    val mContext = LocalContext.current
+    val mYear: Int
+    val mMonth: Int
+    val mDay: Int
 
 
-val mCalendar = Calendar.getInstance()
-mYear = mCalendar.get(Calendar.YEAR)
-mMonth = mCalendar.get(Calendar.MONTH)
-mDay = mCalendar.get(Calendar.DAY_OF_MONTH)
+    val mCalendar = Calendar.getInstance()
+    mYear = mCalendar.get(Calendar.YEAR)
+    mMonth = mCalendar.get(Calendar.MONTH)
+    mDay = mCalendar.get(Calendar.DAY_OF_MONTH)
 
-mCalendar.time = Date()
+    mCalendar.time = Date()
 
-val mDatePickerDialog = DatePickerDialog(
-    mContext, { _: DatePicker, mYear: Int, mMonth: Int, mDayOfMonth: Int ->
-        if (mMonth < 9) {
-            setDate("$mYear-0${mMonth + 1}-$mDayOfMonth")
-        } else {
-            setDate("$mYear-${mMonth + 1}-$mDayOfMonth")
+    val mDatePickerDialog = DatePickerDialog(
+        mContext, { _: DatePicker, mYear: Int, mMonth: Int, mDayOfMonth: Int ->
+            if (mMonth < 9) {
+                setDate("$mYear-0${mMonth + 1}-$mDayOfMonth")
+            } else {
+                setDate("$mYear-${mMonth + 1}-$mDayOfMonth")
+            }
+        }, mYear, mMonth, mDay
+    )
+
+    var jobRolesList = emptyList<itemDropdown>()
+
+
+    when (jobRoles.value) {
+        is Result.Success -> {
+            val data = (jobRoles.value as Result.Success<JobRolesResponse>).data
+            jobRolesList = data?.data?.map {
+                itemDropdown(id = it?.id!!, value = it?.attributes?.name!!)
+            } ?: emptyList()
         }
-    }, mYear, mMonth, mDay
-)
-
-LazyColumn(
-modifier = Modifier
-.fillMaxSize()
-.padding(start = 24.dp, end = 24.dp)
-) {
-    item {
-        Row(
-            modifier = Modifier
-                .padding(top = 52.dp)
-                .fillMaxWidth()
-                .clickable {
-                    navController.popBackStack()
-                }, verticalAlignment = Alignment.CenterVertically
-        ) {
-            Image(
-                painter = painterResource(id = R.drawable.back_icon),
-                contentDescription = "Back Icon",
-                modifier = Modifier.height(20.dp)
-            )
-
-            Text(
-                text = "Make an Announcement",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.SemiBold,
-                modifier = Modifier.padding(start = 8.dp)
-            )
-        }
+        else -> {}
     }
-    item {
-        Column(
-            modifier = Modifier
-                .padding(top = 24.dp)
-        ) {
-            TextInput(
-                onValueChange = {
+
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(start = 24.dp, end = 24.dp)
+    ) {
+        item {
+            Row(
+                modifier = Modifier
+                    .padding(top = 52.dp)
+                    .fillMaxWidth()
+                    .clickable {
+                        navController.popBackStack()
+                    }, verticalAlignment = Alignment.CenterVertically
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.back_icon),
+                    contentDescription = "Back Icon",
+                    modifier = Modifier.height(20.dp)
+                )
+
+                Text(
+                    text = "Make an Announcement",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.padding(start = 8.dp)
+                )
+            }
+        }
+        item {
+            Column(
+                modifier = Modifier.padding(top = 24.dp)
+            ) {
+                TextInput(onValueChange = {
                     setTitle(it)
                 },
-                modifier = Modifier
-                    .padding(bottom = 16.dp)
-                    .fillMaxWidth(),
-                label = "Annouchment Title",
-                type = "text",
-                value = title,
-                placeholder = "Daily Meetings",
-            )
-            TextInput(
-                onValueChange = {
+                    modifier = Modifier
+                        .padding(bottom = 16.dp)
+                        .fillMaxWidth(),
+                    label = "Announcement Title",
+                    type = "text",
+                    value = title,
+                    placeholder = "Daily Meetings",
+                    isValid = {
+                        setTitleValid(it)
+                    })
+                TextInput(onValueChange = {
                     setDescription(it)
                 },
-                modifier = Modifier
-                    .padding(bottom = 16.dp)
-                    .height(150.dp)
-                    .fillMaxWidth(),
-                label = "Annouchment Description",
-                type = "text",
-                value = description,
-                placeholder = "Enter announcement details",
-            )
-            TextInput(
-                value = date,
-                onValueChange = setDate,
-                label = "Date",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(50.dp)
-                    .clip(RoundedCornerShape(10.dp))
-                    .clickable {
-                        mDatePickerDialog.show()
-                    },
-                enabled = false,
-                placeholder = "DD/MM/YYYY",
-            )
+                    modifier = Modifier
+                        .padding(bottom = 16.dp)
+                        .height(150.dp)
+                        .fillMaxWidth(),
+                    label = "Announcement Description",
+                    type = "text",
+                    value = description,
+                    placeholder = "Enter announcement details",
+                    isValid = {
+                        setDescriptionValid(it)
+                    })
+                TextInput(
+                    value = date,
+                    onValueChange = setDate,
+                    label = "Date",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(50.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                        .clickable {
+                            mDatePickerDialog.show()
+                        },
+                    enabled = false,
+                    placeholder = "DD/MM/YYYY",
+                )
 
-            Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
-            TextInput(
-                onValueChange = {
-                    setRole(it.toInt())
-                },
-                modifier = Modifier
-                    .padding(bottom = 16.dp)
-                    .fillMaxWidth(),
-                label = "Role",
-                type = "number",
-                value = role.toString(),
-                placeholder = "Developer, Designer",
-            )
-            Spacer(modifier = Modifier.height(32.dp))
-            CustomButton(
-                onClick = {
-                    addAnnouncement()
-                },
-                text = "Submit",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(45.dp)
-            )
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    androidx.compose.material3.Text(
+                        text = "Role",
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        modifier = Modifier
+                            .padding(bottom = 18.dp)
+                            .fillMaxWidth()
+                    )
+                    Dropdown(
+                        value = role, onItemClick = {
+                            setRole(it.value)
+                            setRoleId(it.id)
+                        }, dropDownItems = jobRolesList, placeholder = "Select Role"
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(32.dp))
+                CustomButton(
+                    onClick = {
+                        addAnnouncement()
+                    }, text = "Add Announcement",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(45.dp)
+                )
+            }
         }
     }
-}
 }
 
 @Preview(showBackground = true)

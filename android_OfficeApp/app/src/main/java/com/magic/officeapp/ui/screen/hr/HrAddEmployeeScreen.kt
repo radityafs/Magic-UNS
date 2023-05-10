@@ -63,12 +63,14 @@ fun HrAddEmployeeScreen(
     val jobRoles = employeeViewModel.jobRolesData.collectAsState()
     val loading = employeeViewModel.loading.collectAsState()
     val addEmployeeResponse = employeeViewModel.insertEmployeeDataResponse.collectAsState()
-    var jobRolesList = emptyList<itemDropdown>()
 
 
     if (user.value?.jwt != null) {
         employeeViewModel.getJobRoles(user.value?.jwt ?: "")
     }
+
+    var jobRolesList = emptyList<itemDropdown>()
+
 
     fun addEmployee() {
         if (isValidName && isValidEmail && isValidPhone && isValidPassword && isValidSalary && roleId != 0) {
