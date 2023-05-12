@@ -16,6 +16,7 @@ val Secondary = Color("#3D4350".toColorInt())
 
 val Red100 = Color("#FCE2E2".toColorInt())
 val Red200 = Color(0xFFEF2E8)
+val Red600 = Color("#D3221E".toColorInt())
 
 val Grey100 = Color("#F3F4F6".toColorInt())
 val Grey200 = Color("#E5E7EB".toColorInt())

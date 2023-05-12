@@ -42,6 +42,8 @@ class AuthViewModel @Inject constructor(
             _loginState.value = repository.login(email, password)
             if (_loginState.value is Result.Success) {
                 getDetails((_loginState.value as Result.Success).data.jwt)
+            }else{
+                _loading.value = false
             }
         }
     }

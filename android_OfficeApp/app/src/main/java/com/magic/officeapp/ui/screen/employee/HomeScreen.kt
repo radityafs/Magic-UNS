@@ -1,7 +1,8 @@
 package com.magic.officeapp.ui.screen.employee
 
 import android.annotation.SuppressLint
-import android.util.Log
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -16,7 +17,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
@@ -24,10 +24,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.magic.officeapp.R
-import com.magic.officeapp.ui.component.CustomCard
 import com.magic.officeapp.ui.component.Menu
 import com.magic.officeapp.ui.navigation.Screen
-import com.magic.officeapp.ui.theme.Grey700
 import com.magic.officeapp.ui.theme.Grey800
 import com.magic.officeapp.ui.viewmodel.AttendanceViewModel
 import com.magic.officeapp.ui.viewmodel.AuthViewModel
@@ -36,6 +34,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 
 
+@RequiresApi(Build.VERSION_CODES.O)
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
 fun HomeScreen(
@@ -164,25 +163,27 @@ fun HomeScreen(
             }
 
         }
-        items(4, key = { index -> index }) { index ->
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 10.dp)
-            ) {
-                CustomCard(title = "Request",
-                    created_at = "2021-09-09 12:00:00",
-                    icon = 0,
-                    onClick = {})
-
-                Divider(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(1.dp),
-                    color = Color("#F0F1F3".toColorInt())
-                )
-            }
-        }
+//        items(4, key = { index -> index }) { index ->
+//            Column(
+//                modifier = Modifier
+//                    .fillMaxWidth()
+//                    .padding(top = 10.dp)
+//            ) {
+//                CustomCard(
+//                    title = "Request",
+//                    created_at = "2023-05-10T15:44:32.329Z",
+//                    onClick = {},
+//                    requestType = "Leave",
+//                )
+//
+//                Divider(
+//                    modifier = Modifier
+//                        .fillMaxWidth()
+//                        .height(1.dp),
+//                    color = Color("#F0F1F3".toColorInt())
+//                )
+//            }
+//        }
         item {
             Spacer(modifier = Modifier.padding(bottom = 100.dp))
         }
@@ -190,8 +191,3 @@ fun HomeScreen(
 
 }
 
-@Preview(showBackground = true)
-@Composable
-fun HomeScreenPreview() {
-    HomeScreen()
-}

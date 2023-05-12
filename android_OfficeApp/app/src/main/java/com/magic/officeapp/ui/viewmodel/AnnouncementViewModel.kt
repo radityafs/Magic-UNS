@@ -3,6 +3,7 @@ package com.magic.officeapp.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.magic.officeapp.data.model.response.AddAnnouncementResponse
+import com.magic.officeapp.data.model.response.announcement.AnnouncementsResponse
 import com.magic.officeapp.data.repository.AnnouncementRepository
 import com.magic.officeapp.utils.constants.Result
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -17,10 +18,29 @@ class AnnouncementViewModel @Inject constructor(
 ) : ViewModel() {
 
     private var _loading = MutableStateFlow(false)
-    val loading get()= _loading
+    val loading get() = _loading
 
-    private val _addAnnouncementState = MutableStateFlow<Result<AddAnnouncementResponse>>(Result.Empty)
+    private val _userAnnouncementState =
+        MutableStateFlow<Result<AnnouncementsResponse>>(Result.Empty)
+    val userAnnouncementState get() = _userAnnouncementState
+
+    private val _addAnnouncementState =
+        MutableStateFlow<Result<AddAnnouncementResponse>>(Result.Empty)
     val addAnnouncementState get() = _addAnnouncementState
+
+    fun getAnnouncementUser(
+        userId: String,
+        jobRoleId: String
+    ) {
+        viewModelScope.launch {
+            _loading.value = true
+            _userAnnouncementState.value = repository.getUserAnnouncement(
+                userId = userId,
+                jobRoleId = jobRoleId
+            )
+            _loading.value = false
+        }
+    }
 
     fun addAnnouncement(
         title: String,

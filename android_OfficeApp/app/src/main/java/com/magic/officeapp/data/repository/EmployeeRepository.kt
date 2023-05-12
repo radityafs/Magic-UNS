@@ -49,7 +49,7 @@ class EmployeeRepository @Inject constructor(
         return try {
             Result.Success(
                 apiService.addEmployee(
-                    registerRequest
+                    registerRequest = registerRequest
                 )
             )
         } catch (e: Exception) {

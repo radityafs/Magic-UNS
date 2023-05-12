@@ -25,6 +25,7 @@ interface ApiEmployeeInterface {
 
     @POST("api/auth/local/register")
     suspend fun addEmployee(
+        @Header("Authorization") token: String = "Bearer",
         @Body registerRequest: RegisterEmployeeRequest
     ): RegisterEmployeeResponse
 }

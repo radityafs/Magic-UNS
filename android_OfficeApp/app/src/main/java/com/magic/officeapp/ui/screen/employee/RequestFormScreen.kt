@@ -2,6 +2,7 @@ package com.magic.officeapp.ui.screen.employee
 
 import android.app.DatePickerDialog
 import android.widget.DatePicker
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -9,6 +10,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -22,23 +24,49 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.magic.officeapp.R
 import com.magic.officeapp.ui.component.CustomButton
 import com.magic.officeapp.ui.component.TextInput
 import com.magic.officeapp.ui.navigation.Screen
+import com.magic.officeapp.ui.viewmodel.AuthViewModel
+import com.magic.officeapp.ui.viewmodel.RequestViewModel
 import java.util.*
-
+import com.magic.officeapp.utils.constants.Result
 
 @Composable
 fun RequestFormScreen(
     navController: NavController = rememberNavController(),
+    authViewModel: AuthViewModel = hiltViewModel(),
+    requestViewModel: RequestViewModel = hiltViewModel()
 ) {
+
+    val user = authViewModel.userData.collectAsState().value
+    val addRequestState = requestViewModel.addRequestState.collectAsState().value
 
     val (selectedType, setSelectedType) = remember { mutableStateOf("permit") }
     val (description, setDescription) = remember { mutableStateOf("") }
     val (date, setDate) = remember { mutableStateOf("") }
+
+    when (addRequestState) {
+        is Result.Success -> {
+            if (navController.currentDestination?.route == Screen.RequestFormScreen.route) {
+                navController.navigate(Screen.RequestScreen.route) {
+                    popUpTo(Screen.RequestFormScreen.route) {
+                        inclusive = true
+                    }
+                }
+            }
+        }
+        is Result.Error -> {
+            Toast.makeText(LocalContext.current, addRequestState.message, Toast.LENGTH_SHORT).show()
+        }
+        else -> {
+
+        }
+    }
 
     val mContext = LocalContext.current
     val mYear: Int
@@ -54,7 +82,11 @@ fun RequestFormScreen(
 
     val mDatePickerDialog = DatePickerDialog(
         mContext, { _: DatePicker, mYear: Int, mMonth: Int, mDayOfMonth: Int ->
-            setDate("$mDayOfMonth/${mMonth + 1}/$mYear")
+            if (mMonth < 9) {
+                setDate("$mYear-0${mMonth + 1}-$mDayOfMonth")
+            } else {
+                setDate("$mYear-${mMonth + 1}-$mDayOfMonth")
+            }
         }, mYear, mMonth, mDay
     )
 
@@ -78,6 +110,19 @@ fun RequestFormScreen(
                     shape = RoundedCornerShape(6.dp)
                 )
         }
+    }
+
+    fun addRequest() {
+        if (description.isEmpty()) {
+            return
+        }
+
+        requestViewModel.createRequest(
+            user?.id.toString(),
+            selectedType,
+            description,
+            if (selectedType == "permit") date else null
+        )
     }
 
     Column(
@@ -204,11 +249,7 @@ fun RequestFormScreen(
         Column(modifier = Modifier.fillMaxWidth()) {
             CustomButton(
                 onClick = {
-                    navController.navigate(Screen.HomeScreen.route) {
-                        popUpTo(Screen.HomeScreen.route) {
-                            inclusive = true
-                        }
-                    }
+                    addRequest()
                 }, text = "Request", modifier = Modifier
                     .fillMaxWidth()
                     .height(48.dp)

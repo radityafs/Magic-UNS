@@ -20,6 +20,9 @@ class AttendanceViewModel @Inject constructor(
     private val repository: AttendanceRepository
 ) : ViewModel() {
 
+    private val _attendanceState = MutableStateFlow<Result<AttendanceResponse>>(Result.Empty)
+    val attendanceState get() = _attendanceState
+
     private val _todayAttendance = MutableStateFlow<Result<AttendanceResponse>>(Result.Empty)
     val todayAttendance get() = _todayAttendance
 
@@ -38,6 +41,20 @@ class AttendanceViewModel @Inject constructor(
             _loading.value = true
             _location.value = repository.getLocation()
             _loading.value = false
+        }
+    }
+
+    fun getAttendanceUser(userId: String){
+        viewModelScope.launch {
+            _loading.value = true
+            try {
+                val attendance = repository.getAttendanceUser(userId)
+                _attendanceState.value = attendance
+                _loading.value = false
+            } catch (e: Exception) {
+                _loading.value = false
+                _attendanceState.value = Result.Error(e.message.toString())
+            }
         }
     }
 

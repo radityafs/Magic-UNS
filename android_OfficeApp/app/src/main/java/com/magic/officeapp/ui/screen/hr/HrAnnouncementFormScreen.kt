@@ -62,7 +62,6 @@ fun HrAnnouncementFormScreen(
     val (role, setRole) = remember { mutableStateOf("") }
     val (roleId, setRoleId) = remember { mutableStateOf(0) }
 
-    //Validation
     var (isTitleValid, setTitleValid) = remember { mutableStateOf(false) }
     val (isDescriptionValid, setDescriptionValid) = remember { mutableStateOf(false) }
 
@@ -103,12 +102,10 @@ fun HrAnnouncementFormScreen(
         else -> {}
     }
 
-// date picker dialog
     val mContext = LocalContext.current
     val mYear: Int
     val mMonth: Int
     val mDay: Int
-
 
     val mCalendar = Calendar.getInstance()
     mYear = mCalendar.get(Calendar.YEAR)
@@ -128,7 +125,6 @@ fun HrAnnouncementFormScreen(
     )
 
     var jobRolesList = emptyList<itemDropdown>()
-
 
     when (jobRoles.value) {
         is Result.Success -> {

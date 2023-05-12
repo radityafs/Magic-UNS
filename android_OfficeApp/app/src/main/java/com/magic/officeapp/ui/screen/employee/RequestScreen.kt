@@ -1,6 +1,9 @@
 package com.magic.officeapp.ui.screen.employee
 
 import android.annotation.SuppressLint
+import android.os.Build
+import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -12,12 +15,14 @@ import androidx.compose.material.FabPosition
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
@@ -25,14 +30,54 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.magic.officeapp.R
 import com.magic.officeapp.ui.component.CustomButton
-import com.magic.officeapp.ui.component.CustomCard
 import com.magic.officeapp.ui.navigation.Screen
+import com.magic.officeapp.ui.viewmodel.AuthViewModel
+import com.magic.officeapp.ui.viewmodel.RequestViewModel
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.magic.officeapp.data.model.response.request.DataItem
+import com.magic.officeapp.ui.component.CardRequests
+import com.magic.officeapp.utils.constants.Result
 
+
+@RequiresApi(Build.VERSION_CODES.O)
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
 fun RequestScreen(
     navController: NavController = rememberNavController(),
+    authViewModel: AuthViewModel = hiltViewModel(),
+    requestViewModel: RequestViewModel = hiltViewModel()
 ) {
+
+    var requestList = emptyList<DataItem>()
+
+    val requestData = requestViewModel.requestDataState.collectAsState().value
+    val acceptedRequest = remember { mutableStateOf(0) }
+    val pendingRequest = remember { mutableStateOf(0) }
+    val rejectedRequest = remember { mutableStateOf(0) }
+
+    val user = authViewModel.userData.collectAsState().value
+
+    if (user?.jwt != null) {
+        requestViewModel.getUserRequest(user.id.toString())
+    }
+
+    when (requestData) {
+        is Result.Success -> {
+            val data = requestData.data.data
+            requestList = data as List<DataItem>
+
+            acceptedRequest.value = data.filter { it.attributes?.isApproved == "approved" }.size
+            pendingRequest.value = data.filter { it.attributes?.isApproved == "waiting" }.size
+            rejectedRequest.value = data.filter { it.attributes?.isApproved == "rejected" }.size
+        }
+        is Result.Error -> {
+            Log.d("TAG", "RequestScreen: ${requestData.message}")
+        }
+        else -> {
+            Log.d("TAG", "RequestScreen: $requestData")
+        }
+    }
+
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -90,7 +135,7 @@ fun RequestScreen(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            text = "12",
+                            text = acceptedRequest.value.toString(),
                             fontSize = 32.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color("#37A345".toColorInt())
@@ -108,7 +153,7 @@ fun RequestScreen(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            text = "5",
+                            text = pendingRequest.value.toString(),
                             fontSize = 32.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color("#E5B200".toColorInt())
@@ -126,7 +171,7 @@ fun RequestScreen(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            text = "12",
+                            text = rejectedRequest.value.toString(),
                             fontSize = 32.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color("#D3221E".toColorInt())
@@ -167,23 +212,31 @@ fun RequestScreen(
 
             }
 
-            items(10, key = { index -> index }) { index ->
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 10.dp)
-                ) {
-                    CustomCard(title = "Request",
-                        created_at = "2021-09-09 12:00:00",
-                        icon = 0,
-                        onClick = {})
-
-                    Divider(
+            requestList.map { request ->
+                item(key = request.id) {
+                    Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(1.dp),
-                        color = Color("#F0F1F3".toColorInt())
-                    )
+                            .padding(top = 10.dp)
+                    ) {
+                        CardRequests(
+                            title = if (request.attributes?.requestType == "permit") "Request Permit" else "Other Request",
+                            created_at = request.attributes?.createdAt!!,
+                            Status = request.attributes?.isApproved!!,
+                            onClick = {
+                                navController.navigate(Screen.RequestDetailScreen.route + "/${request.id}")
+                            },
+                            requestType = request.attributes?.requestType!!
+                        )
+
+
+                        Divider(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(1.dp),
+                            color = Color("#F0F1F3".toColorInt())
+                        )
+                    }
                 }
             }
 
@@ -191,16 +244,7 @@ fun RequestScreen(
                 Spacer(modifier = Modifier.padding(bottom = 100.dp))
             }
         }
-
-
     }
-
-
 }
 
 
-@Preview(showBackground = true)
-@Composable
-fun RequestScreenPreview() {
-    RequestScreen()
-}

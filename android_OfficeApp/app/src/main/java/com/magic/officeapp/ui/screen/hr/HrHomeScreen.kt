@@ -1,5 +1,7 @@
 package com.magic.officeapp.ui.screen.hr
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -26,7 +28,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.magic.officeapp.R
-import com.magic.officeapp.ui.component.CustomCard
 import com.magic.officeapp.ui.component.CustomIcon
 import com.magic.officeapp.ui.navigation.Screen
 import com.magic.officeapp.ui.theme.Green100
@@ -38,6 +39,7 @@ import java.sql.Time
 import java.text.SimpleDateFormat
 import com.magic.officeapp.utils.constants.Result
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun HrHomeScreen(
     navController: NavController = rememberNavController(),
@@ -46,7 +48,7 @@ fun HrHomeScreen(
 ) {
     val user = authViewModel.userData.collectAsState()
 
-    if(user?.value?.jwt != null){
+    if (user?.value?.jwt != null) {
         employeeViewModel.getEmployeeList(user.value?.jwt ?: "")
     }
 
@@ -390,25 +392,26 @@ fun HrHomeScreen(
 
         }
 
-        items(4, key = { index -> index }) { _ ->
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 10.dp)
-            ) {
-                CustomCard(title = "Request",
-                    created_at = "2021-09-09 12:00:00",
-                    icon = 0,
-                    onClick = {})
-
-                Divider(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(1.dp),
-                    color = Color("#F0F1F3".toColorInt())
-                )
-            }
-        }
+//        items(4, key = { index -> index }) { _ ->
+//            Column(
+//                modifier = Modifier
+//                    .fillMaxWidth()
+//                    .padding(top = 10.dp)
+//            ) {
+//                CustomCard(
+//                    title = "Request",
+//                    created_at = "2023-05-10T15:44:32.329Z",                    onClick = {},
+//                    requestType = "Leave",
+//                )
+//
+//                Divider(
+//                    modifier = Modifier
+//                        .fillMaxWidth()
+//                        .height(1.dp),
+//                    color = Color("#F0F1F3".toColorInt())
+//                )
+//            }
+//        }
         item {
             Spacer(modifier = Modifier.padding(bottom = 100.dp))
         }
@@ -416,8 +419,3 @@ fun HrHomeScreen(
 }
 
 
-@Preview(showBackground = true)
-@Composable
-fun HomeScreenPreview() {
-    HrHomeScreen()
-}

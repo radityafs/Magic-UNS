@@ -43,15 +43,26 @@ fun LoginScreen(
     val (isValidPassword, setIsValidPassword) = remember { mutableStateOf(false) }
 
     val loading = viewModel.loading.collectAsState()
+    val loginState = viewModel.loginState.collectAsState()
     val loginResponse = viewModel.loginDetail.collectAsState()
 
     fun login() {
         if (!isValidEmail || !isValidPassword || email.isEmpty() || password.isEmpty()) {
             Toast.makeText(navController.context, "Please fill all the fields", Toast.LENGTH_SHORT)
                 .show()
-        } else {
-            viewModel.login(email, password)
+            return
         }
+
+        viewModel.login(email, password)
+    }
+
+    when(loginState.value){
+        is Result.Error -> {
+            Toast.makeText(
+                navController.context, "Password or Email is incorrect", Toast.LENGTH_SHORT
+            ).show()
+        }
+        else -> {}
     }
 
     when (loginResponse.value) {
@@ -64,18 +75,12 @@ fun LoginScreen(
                     navController.navigate(Screen.HRHomeScreen.route) {
                         popUpTo(Screen.LoginScreen.route) { inclusive = true }
                     }
-                }else{
+                } else {
                     navController.navigate(Screen.HomeScreen.route) {
                         popUpTo(Screen.LoginScreen.route) { inclusive = true }
                     }
                 }
             }
-        }
-        is Result.Error -> {
-            Log.d("LoginScreen", "login: ${loginResponse.value}")
-            Toast.makeText(
-                navController.context, "Password or Email is incorrect", Toast.LENGTH_SHORT
-            ).show()
         }
         else -> {}
     }
@@ -101,7 +106,7 @@ fun LoginScreen(
                         text = "Hi, Welcome Back! \uD83D\uDC4B",
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold,
-                        )
+                    )
                 }
 
                 Row(
@@ -139,10 +144,9 @@ fun LoginScreen(
                         .padding(top = 20.dp)
                         .fillMaxWidth()
                 ) {
-                    TextInput(
-                        onValueChange = {
-                            setPassword(it)
-                        },
+                    TextInput(onValueChange = {
+                        setPassword(it)
+                    },
                         isValid = {
                             setIsValidPassword(it)
                         },

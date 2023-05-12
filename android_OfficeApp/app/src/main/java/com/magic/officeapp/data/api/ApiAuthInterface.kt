@@ -12,12 +12,12 @@ import retrofit2.http.POST
 
 interface ApiAuthInterface {
 
-    @POST("api/auth/local/?populates=")
+    @POST("api/auth/local")
     suspend fun login(
         @Body loginRequest: LoginRequest
     ): LoginResponse
 
-    @GET("api/users/me/?populate=role")
+    @GET("api/users/me/?populate=*")
     suspend fun getDetails(
         @Header("Authorization") token: String
     ): DetailUserResponse

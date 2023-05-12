@@ -189,8 +189,3 @@ fun HrAnnouncementScreen(
     }
 }
 
-@Preview
-@Composable
-fun AnnuncementScreenPreview() {
-    HrAnnouncementScreen()
-}

@@ -26,6 +26,14 @@ class AttendanceRepository @Inject constructor(
         }
     }
 
+    suspend fun getAttendanceUser(userId: String) : Result<AttendanceResponse>{
+        return try {
+            Result.Success(apiService.getAttendanceByUserId(userId = userId))
+        } catch (e: Exception) {
+            Result.Error(e.message.toString())
+        }
+    }
+
     suspend fun getLocation(): Result<LocationResponse> {
         return try {
             Result.Success(apiService.getApiLocation())
@@ -42,7 +50,7 @@ class AttendanceRepository @Inject constructor(
         return try {
             Result.Success(
                 apiService.postAttendance(
-                    AttendanceRequest(
+                    attendanceRequest = AttendanceRequest(
                         data = DataAttendanceRequest(
                             user = userId.toInt(),
                             latitude = latitude,

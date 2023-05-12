@@ -2,10 +2,13 @@ package com.magic.officeapp
 
 import android.annotation.SuppressLint
 import android.location.Location
+import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.*
@@ -23,6 +26,7 @@ import com.google.android.gms.location.LocationServices
 import com.magic.officeapp.data.model.response.AttendanceResponse
 import com.magic.officeapp.data.model.response.LocationResponse
 import com.magic.officeapp.ui.component.BottomNavigationBar
+import com.magic.officeapp.ui.component.Dialog
 import com.magic.officeapp.ui.navigation.Screen
 import com.magic.officeapp.ui.screen.*
 import com.magic.officeapp.ui.screen.employee.*
@@ -30,12 +34,13 @@ import com.magic.officeapp.ui.screen.hr.HrAnnouncementFormScreen
 import com.magic.officeapp.ui.screen.hr.HrAnnouncementScreen
 import com.magic.officeapp.ui.screen.hr.HrEmployeeListScreen
 import com.magic.officeapp.ui.screen.hr.HrHomeScreen
-import com.magic.officeapp.ui.theme.Grey700
-import com.magic.officeapp.ui.theme.OfficeAppTheme
+import com.magic.officeapp.ui.theme.*
 import com.magic.officeapp.ui.viewmodel.AttendanceViewModel
 import com.magic.officeapp.ui.viewmodel.AuthViewModel
+import com.magic.officeapp.utils.constants.DialogItem
 import com.magic.officeapp.utils.constants.Result
 import com.magic.officeapp.utils.hasLocationPermission
+import com.magic.officeapp.utils.isHoliday
 import dagger.hilt.android.AndroidEntryPoint
 import java.util.*
 
@@ -43,6 +48,7 @@ import java.util.*
 @AndroidEntryPoint
 @SuppressLint("MissingPermission")
 class MainActivity : ComponentActivity() {
+    @RequiresApi(Build.VERSION_CODES.O)
     @SuppressLint("UnusedMaterialScaffoldPaddingParameter", "FlowOperatorInvokedInComposition")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -61,14 +67,16 @@ class MainActivity : ComponentActivity() {
                     val officeLocation by attendanceViewModel.location.collectAsState()
                     val loadingAuthentication by authViewModel.loading.collectAsState()
                     val loadingAttendance by attendanceViewModel.loading.collectAsState()
+                    val showDialog = remember { mutableStateOf(false) }
+                    val dialogItem = remember { mutableStateOf(DialogItem()) }
 
-                    if (isLogged && todayAttendance == Result.Empty) {
+                    if (isLogged && user?.role?.name != "HR" && todayAttendance == Result.Empty) {
                         attendanceViewModel.getAttendanceToday(user?.id.toString())
                     }
 
-                    fun startDestination() : String {
-                        if (loadingAuthentication || loadingAttendance) {
-                            Screen.LoadingScreen.route
+                    fun startDestination(): String {
+                        if (loadingAuthentication) {
+                            return Screen.LoadingScreen.route
                         }
 
                         return if (isLogged) {
@@ -78,12 +86,12 @@ class MainActivity : ComponentActivity() {
                                 Screen.HomeScreen.route
                             }
                         } else {
-                            Screen.SplashScreen.route
+                            return Screen.SplashScreen.route
                         }
                     }
 
                     fun insertAttendance() {
-                        if (user?.role?.name != "HR") {
+                        if (isLogged && user?.role?.name != "HR") {
                             if (loadingAttendance) {
                                 Toast.makeText(
                                     this, "Please wait", Toast.LENGTH_SHORT
@@ -91,14 +99,32 @@ class MainActivity : ComponentActivity() {
                                 return
                             }
 
-                            val todayAttendance =
-                                todayAttendance as Result.Success<AttendanceResponse>
-                            val isCheckIn = todayAttendance.data.data?.isNotEmpty()!!
+                            var isCheckIn = false
+                            if (todayAttendance is Result.Success) {
+                                isCheckIn =
+                                    (todayAttendance as Result.Success<AttendanceResponse>).data.data?.size!! > 0
+                            } else {
+                                Toast.makeText(
+                                    this, "Failed to get attendance data", Toast.LENGTH_SHORT
+                                ).show()
+                                return
+                            }
 
                             if (isCheckIn) {
-                                Toast.makeText(
-                                    this, "You have checked in today", Toast.LENGTH_SHORT
-                                ).show()
+                                dialogItem.value = DialogItem(
+                                    backgroundButton = Grey800,
+                                    icon = R.drawable.state_leave,
+                                    title = "Check Out",
+                                    message = "Are you sure want to check out?",
+                                    onConfirmAction = {
+                                        showDialog.value = false
+                                    },
+                                    onCancelAction = {
+                                        showDialog.value = false
+                                    },
+                                    iconBackgroundColor = Grey100,
+                                )
+                                showDialog.value = true
                                 return
                             }
 
@@ -107,27 +133,41 @@ class MainActivity : ComponentActivity() {
                                     LocationServices.getFusedLocationProviderClient(this)
                                 fusedLocationClient.lastLocation.addOnSuccessListener { location ->
                                     if (location != null) {
-                                        val dataOfficeLocation =
-                                            officeLocation as Result.Success<LocationResponse>
-                                        val officeLocation = Location(
+                                        val officeLocationLoc = Location(
                                             "Office Location"
                                         )
 
-                                        officeLocation.latitude =
-                                            dataOfficeLocation.data.data?.attributes?.latitude?.toDouble()!!
-                                        officeLocation.longitude =
-                                            dataOfficeLocation.data.data?.attributes?.longitude?.toDouble()!!
-
-                                        val distance =
-                                            location.distanceTo(officeLocation) // in meters
-
-                                        if (distance > 100) {
+                                        if (officeLocation is Result.Success) {
+                                            val data =
+                                                (officeLocation as Result.Success<LocationResponse>)
+                                            officeLocationLoc.latitude =
+                                                data.data.data?.attributes?.latitude?.toDouble()!!
+                                            officeLocationLoc.longitude =
+                                                data.data.data?.attributes?.longitude?.toDouble()!!
+                                        } else {
                                             Toast.makeText(
                                                 this,
-                                                "You are not in the office area",
+                                                "Failed to get office location",
                                                 Toast.LENGTH_SHORT
                                             ).show()
+                                            return@addOnSuccessListener
+                                        }
 
+                                        val distance =
+                                            location.distanceTo(officeLocationLoc).toDouble()
+
+                                        if (distance > 100) {
+                                            dialogItem.value = DialogItem(
+                                                backgroundButton = Red600,
+                                                icon = R.drawable.state_location,
+                                                title = "Location does not match",
+                                                message = "Your location is not what the app requires. Please check your location settings again or try again later.",
+                                                onConfirmAction = {
+                                                    showDialog.value = false
+                                                },
+                                                iconBackgroundColor = Red100,
+                                            )
+                                            showDialog.value = true
                                             return@addOnSuccessListener
                                         }
 
@@ -165,7 +205,7 @@ class MainActivity : ComponentActivity() {
                                 BottomNavigationBar(navController = navController)
                             }
 
-                            if(currentRoute == Screen.HRHomeScreen.route) {
+                            if (currentRoute == Screen.HRHomeScreen.route) {
                                 BottomNavigationBar(navController = navController, isHR = true)
                             }
                         },
@@ -193,11 +233,22 @@ class MainActivity : ComponentActivity() {
                         isFloatingActionButtonDocked = true,
                         modifier = Modifier.fillMaxSize()
                     ) {
-                        NavHost(
-                            navController = navController,
-                            startDestination = startDestination()
-                        ) {
 
+                        Dialog(
+                            show = showDialog.value,
+                            title = dialogItem.value.title,
+                            message = dialogItem.value.message,
+                            onDismissAction = dialogItem.value.onDismissAction,
+                            icon = dialogItem.value.icon,
+                            iconBackgroundColor = dialogItem.value.iconBackgroundColor,
+                            onConfirmAction = dialogItem.value.onConfirmAction,
+                            backgroundButton = dialogItem.value.backgroundButton,
+                            onCancelAction = dialogItem.value.onCancelAction
+                        )
+
+                        NavHost(
+                            navController = navController, startDestination = startDestination()
+                        ) {
 
                             composable(Screen.SplashScreen.route) {
                                 SplashScreen(navController = navController)

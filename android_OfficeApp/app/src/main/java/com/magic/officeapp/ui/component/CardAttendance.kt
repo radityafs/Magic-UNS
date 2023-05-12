@@ -1,15 +1,15 @@
 package com.magic.officeapp.ui.component
 
-import androidx.compose.foundation.background
+import android.os.Build
+import androidx.annotation.RequiresApi
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Divider
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
@@ -17,37 +17,37 @@ import com.magic.officeapp.R
 import com.magic.officeapp.ui.theme.Green100
 import com.magic.officeapp.ui.theme.Red100
 import com.magic.officeapp.ui.theme.Yellow100
-import com.magic.officeapp.utils.constants.changeDateFormat
+import com.magic.officeapp.utils.constants.utcToFormat
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun CustomCard(
+fun CardAttendance(
     title: String,
-    created_at: String,
-    icon: Int,
+    created_at: String = "2021-08-12T00:00:00.000Z",
+    requestType: String = "permit",
     Status: String = "Start",
-    contentDescription: String? = "default",
-    onClick: () -> Unit
+    onClick : () -> Unit = {}
 ) {
 
     val backgroundColor = when (Status) {
-        "Start" -> Yellow100
-        "Done" -> Green100
+        "waiting" -> Yellow100
+        "approved" -> Green100
         else -> Red100
     }
 
-    val Icon = when (Status) {
-        "Start" -> R.drawable.request_icon
-        else -> R.drawable.request_icon
+    val icon = when (requestType) {
+        "permit" -> R.drawable.request_icon
+        else -> R.drawable.icon_document
     }
 
-    val formattedDate = changeDateFormat(created_at, "yyyy-MM-dd HH:mm:ss", "dd MMMM yyyy")
-    val formattedTime = changeDateFormat(created_at, "yyyy-MM-dd HH:mm:ss", "HH:mm a")
-
+    val formattedDate = utcToFormat(created_at, "dd MMMM yyyy")
+    val formattedTime = utcToFormat(created_at, "HH:mm a")
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(91.dp),
+            .height(91.dp)
+            .clickable { onClick() },
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
@@ -56,7 +56,7 @@ fun CustomCard(
         ) {
 
             CustomIcon(
-                icon = Icon,
+                icon = icon,
                 contentDescription = "Request",
                 backgroundColor = backgroundColor,
                 size = 48
@@ -95,9 +95,3 @@ fun CustomCard(
 
 }
 
-
-@Preview(showBackground = true)
-@Composable
-fun CustomCardPreview() {
-    CustomCard(title = "Request", created_at = "2021-09-09 12:00:00", icon = 0, onClick = {})
-}

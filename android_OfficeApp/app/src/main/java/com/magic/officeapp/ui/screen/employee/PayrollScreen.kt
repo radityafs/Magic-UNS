@@ -1,27 +1,25 @@
 package com.magic.officeapp.ui.screen.employee
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.Divider
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.graphics.toColorInt
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.magic.officeapp.R
 import com.magic.officeapp.ui.component.CustomButton
-import com.magic.officeapp.ui.component.CustomCard
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun PayrollScreen(
     navController: NavController = rememberNavController(),
@@ -95,26 +93,26 @@ fun PayrollScreen(
 
         }
 
-        items(4, key = { index -> index }) { index ->
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 10.dp)
-            ) {
-                CustomCard(
-                    title = "Request",
-                    created_at = "2021-09-09 12:00:00",
-                    icon = 0,
-                    onClick = {})
-
-                Divider(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(1.dp),
-                    color = Color("#F0F1F3".toColorInt())
-                )
-            }
-        }
+//        items(4, key = { index -> index }) { index ->
+//            Column(
+//                modifier = Modifier
+//                    .fillMaxWidth()
+//                    .padding(top = 10.dp)
+//            ) {
+//                CustomCard(
+//                    title = "Request",
+//                    onClick = {},
+//                    requestType = "Leave"
+//                )
+//
+//                Divider(
+//                    modifier = Modifier
+//                        .fillMaxWidth()
+//                        .height(1.dp),
+//                    color = Color("#F0F1F3".toColorInt())
+//                )
+//            }
+//        }
 
         item {
             Spacer(modifier = Modifier.padding(bottom = 100.dp))
@@ -123,8 +121,3 @@ fun PayrollScreen(
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun PayrollScreenPreview() {
-    PayrollScreen()
-}

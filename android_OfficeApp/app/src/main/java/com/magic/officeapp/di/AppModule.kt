@@ -1,9 +1,6 @@
 package com.magic.officeapp.di
 
-import com.magic.officeapp.data.api.ApiAnnouncementInterface
-import com.magic.officeapp.data.api.ApiAttendanceInterface
-import com.magic.officeapp.data.api.ApiAuthInterface
-import com.magic.officeapp.data.api.ApiEmployeeInterface
+import com.magic.officeapp.data.api.*
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -45,6 +42,12 @@ object AppModule {
     @Singleton
     fun apiAnnouncement(retrofit: Retrofit): ApiAnnouncementInterface {
         return retrofit.create(ApiAnnouncementInterface::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun apiRequest(retrofit: Retrofit): ApiRequestInterface {
+        return retrofit.create(ApiRequestInterface::class.java)
     }
 
 }
