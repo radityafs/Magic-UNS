@@ -59,13 +59,25 @@ fun HrRequestScreen(
     var (search, setSearch) = remember {
         mutableStateOf("")
     }
-
+    var (acceptedRequest, setAcceptedRequest) = remember {
+        mutableStateOf(0)
+    }
+    var (pendingRequest, setPendingRequest) = remember {
+        mutableStateOf(0)
+    }
+    var (rejectedRequest, setRejectedRequest) = remember {
+        mutableStateOf(0)
+    }
     var requests = requestViewModel.getAllRequestsResponse.collectAsState().value
     var data :  List<GetAllRequestsDataItem> = emptyList()
     requestViewModel.getAllRequests()
     when (requests) {
         is Result.Success -> {
             data = requests.data.data as List<GetAllRequestsDataItem>
+
+            setAcceptedRequest(data.filter { it.attributes?.isApproved == "approved" }.size)
+            setPendingRequest(data.filter { it.attributes?.isApproved == "waiting" }.size)
+            setRejectedRequest(data.filter { it.attributes?.isApproved == "rejected" }.size)
         }
         is Result.Error -> {
             Log.d("TAG", "AnnouncementScreen: ${requests.message}")
@@ -113,7 +125,7 @@ fun HrRequestScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "12",
+                        text = acceptedRequest.toString(),
                         fontSize = 32.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color("#37A345".toColorInt())
@@ -131,7 +143,7 @@ fun HrRequestScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "12",
+                        text = pendingRequest.toString(),
                         fontSize = 32.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color("#E5B200".toColorInt())
@@ -149,7 +161,7 @@ fun HrRequestScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "12",
+                        text = rejectedRequest.toString(),
                         fontSize = 32.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color("#D3221E".toColorInt())
