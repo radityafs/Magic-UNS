@@ -134,7 +134,10 @@ fun HrHomeScreen(
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(top = 12.dp, bottom = 12.dp, start = 16.dp, end = 16.dp),
+                            .padding(top = 12.dp, bottom = 12.dp, start = 16.dp, end = 16.dp)
+                            .clickable(onClick = {
+                                navController.navigate(Screen.HrRequestScreen.route)
+                            }),
                         verticalArrangement = Arrangement.SpaceBetween
                     ) {
                         Row(

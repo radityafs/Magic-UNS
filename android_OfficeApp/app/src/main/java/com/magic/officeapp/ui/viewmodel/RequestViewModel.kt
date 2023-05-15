@@ -2,8 +2,12 @@ package com.magic.officeapp.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.magic.officeapp.data.model.request.RequestUpdate
+import com.magic.officeapp.data.model.request.RequestUpdateData
 import com.magic.officeapp.data.model.response.UserListResponseItem
 import com.magic.officeapp.data.model.response.request.AddRequestResponse
+import com.magic.officeapp.data.model.response.request.GetAllRequestsResponse
+import com.magic.officeapp.data.model.response.request.GetRequestByIdResponse
 import com.magic.officeapp.data.model.response.request.RequestsResponse
 import com.magic.officeapp.data.repository.RequestRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,6 +31,49 @@ class RequestViewModel @Inject constructor(
     private val _addRequestState = MutableStateFlow<Result<AddRequestResponse>>(Result.Empty)
     val addRequestState get() = _addRequestState
 
+    private val _getAllRequestsResponse = MutableStateFlow<Result<GetAllRequestsResponse>>(Result.Empty)
+
+    val getAllRequestsResponse get() = _getAllRequestsResponse
+
+    private val _requestDetail = MutableStateFlow<Result<GetRequestByIdResponse>>(Result.Empty)
+    val requestDetail get() = _requestDetail
+
+
+    fun updateRequestStatus(
+        id: Int,
+        isApproved: String,
+        feedback : String,
+    ) {
+        viewModelScope.launch {
+            _loading.value = true
+            val request = RequestUpdate(
+                data = RequestUpdateData(
+                    isApproved = isApproved,
+                    feedback = feedback
+                )
+            )
+            var data = repository.updateRequestStatus(id, request)
+            _addRequestState.value = data
+            _loading.value = false
+        }
+    }
+    fun getRequestDetail(
+        id: Int,
+    ) {
+        viewModelScope.launch {
+            _loading.value = true
+            _requestDetail.value = repository.getRequestById(id)
+            _loading.value = false
+        }
+    }
+    fun getAllRequests(
+    ) {
+        viewModelScope.launch {
+            _loading.value = true
+            _getAllRequestsResponse.value = repository.getAllRequests()
+            _loading.value = false
+        }
+    }
     fun getUserRequest(
         userId: String,
     ) {

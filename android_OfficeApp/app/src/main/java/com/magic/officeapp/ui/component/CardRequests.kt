@@ -37,6 +37,7 @@ fun CardRequests(
 
     val icon = when (requestType) {
         "permit" -> R.drawable.request_icon
+        "Request Permit" -> R.drawable.request_icon
         else -> R.drawable.icon_document
     }
 

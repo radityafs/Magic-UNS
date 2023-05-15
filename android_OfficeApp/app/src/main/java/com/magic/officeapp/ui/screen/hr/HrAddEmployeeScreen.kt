@@ -11,28 +11,22 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.magic.officeapp.R
 import com.magic.officeapp.ui.component.TextInput
-
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.Text
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.runtime.collectAsState
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.magic.officeapp.data.model.request.RegisterEmployeeRequest
 import com.magic.officeapp.data.model.response.JobRolesResponse
 import com.magic.officeapp.ui.component.CustomButton
 import com.magic.officeapp.ui.navigation.Screen
-import com.magic.officeapp.ui.screen.LoadingScreen
 import com.magic.officeapp.ui.viewmodel.AuthViewModel
 import com.magic.officeapp.ui.viewmodel.EmployeeViewModel
 import com.magic.officeapp.utils.constants.Result
@@ -63,6 +57,7 @@ fun HrAddEmployeeScreen(
     val jobRoles = employeeViewModel.jobRolesData.collectAsState()
     val loading = employeeViewModel.loading.collectAsState()
     val addEmployeeResponse = employeeViewModel.insertEmployeeDataResponse.collectAsState()
+
 
 
     if (user.value?.jwt != null) {

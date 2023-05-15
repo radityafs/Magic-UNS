@@ -1,6 +1,7 @@
 package com.magic.officeapp.ui.screen.hr
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -23,6 +24,7 @@ import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -40,14 +42,39 @@ import com.magic.officeapp.ui.component.CustomButton
 import com.magic.officeapp.ui.component.TextInput
 import com.magic.officeapp.ui.navigation.Screen
 import androidx.compose.runtime.mutableStateOf
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.magic.officeapp.data.model.response.announcement.DataItem
+import com.magic.officeapp.ui.viewmodel.AnnouncementViewModel
+import com.magic.officeapp.ui.viewmodel.AuthViewModel
+import com.magic.officeapp.utils.constants.Result
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
 fun HrAnnouncementScreen(
-    navController: NavController = rememberNavController()
+    navController: NavController = rememberNavController(),
+    announcementViewModel : AnnouncementViewModel = hiltViewModel(),
 ) {
     var (search, setSearch) = remember {
         mutableStateOf("")
+    }
+
+    val announcement = announcementViewModel.announcementData.collectAsState().value
+    var listAnnouncement: List<DataItem> = emptyList()
+    announcementViewModel.getAllAnnouncement()
+
+    when (announcement) {
+        is Result.Success -> {
+            val data = announcement.data.data
+            listAnnouncement = data as List<DataItem>
+        }
+        is Result.Error -> {
+            Log.d("TAG", "AnnouncementScreen: ${announcement.message}")
+        }
+        else -> {
+
+        }
     }
 
     Scaffold(
@@ -137,55 +164,66 @@ fun HrAnnouncementScreen(
                 }
             }
 
-            items(2) {
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 12.dp, bottom = 12.dp),
+            listAnnouncement.map { announcement ->
+                item {
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
                     ) {
-                        Column(
-                            modifier = Modifier.padding(16.dp)
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 12.dp, bottom = 12.dp),
                         ) {
-                            Text(
-                                "20 April 2023",
-                                fontWeight = FontWeight.Medium,
-                                fontSize = 12.sp,
-                                color = Color("#858D9D".toColorInt())
-                            )
+                            Column(
+                                modifier = Modifier.padding(16.dp)
+                            ) {
+                                Text(
+                                    text = announcement.attributes?.date.toString(),
+                                    fontWeight = FontWeight.Medium,
+                                    fontSize = 12.sp,
+                                    color = Color("#858D9D".toColorInt())
+                                )
 
 
-                            Text(
-                                "Meeting Info",
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 14.sp,
-                                color = Color("#292D35".toColorInt()),
-                                modifier = Modifier.padding(top = 12.dp)
-                            )
+                                Text(
+                                    announcement.attributes?.title.toString(),
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 14.sp,
+                                    color = Color("#292D35".toColorInt()),
+                                    modifier = Modifier.padding(top = 12.dp)
+                                )
 
+                                Text(
+                                    announcement.attributes?.description.toString(),
+                                    fontWeight = FontWeight.Medium,
+                                    fontSize = 12.sp,
+                                    color = Color("#858D9D".toColorInt()),
+                                    modifier = Modifier.padding(top = 5.dp)
+                                )
 
-                            Text(
-                                "The daily meeting will be held on Monday, 16 May 2023 at 8 am at the Coworking Space",
-                                fontWeight = FontWeight.Medium,
-                                fontSize = 12.sp,
-                                color = Color("#858D9D".toColorInt()),
-                                modifier = Modifier.padding(top = 5.dp)
-                            )
-
-                            Text(
-                                "To : Developer, Designer",
-                                fontWeight = FontWeight.Medium,
-                                fontSize = 12.sp,
-                                color = Color("#37A345".toColorInt()),
-                                modifier = Modifier.padding(top = 8.dp)
-                            )
+                                Text(
+                                    "To :" + announcement.attributes?.jobRoles?.data?.get(0)?.attributes?.name.toString(),
+                                    fontWeight = FontWeight.Medium,
+                                    fontSize = 12.sp,
+                                    color = Color("#37A345".toColorInt()),
+                                    modifier = Modifier.padding(top = 8.dp)
+                                )
+                            }
                         }
                     }
                 }
             }
+
+            item {
+                Spacer(modifier = Modifier.height(100.dp))
+            }
         }
     }
+}
+
+@Preview
+@Composable
+fun PreviewAnnouncementScreen() {
+    HrAnnouncementScreen()
 }
 

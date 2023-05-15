@@ -79,7 +79,7 @@ fun HrAnnouncementFormScreen(
             Toast.makeText(navController.context, "Please fill all the fields", Toast.LENGTH_SHORT)
                 .show()
         } else {
-            announcementViewModel.addAnnouncement(title, description, date, roleId, 1)
+            announcementViewModel.addAnnouncement(title, description, date, roleId, null)
         }
     }
 
@@ -180,7 +180,8 @@ fun HrAnnouncementFormScreen(
                     placeholder = "Daily Meetings",
                     isValid = {
                         setTitleValid(it)
-                    })
+                    }
+                )
                 TextInput(onValueChange = {
                     setDescription(it)
                 },
@@ -194,7 +195,8 @@ fun HrAnnouncementFormScreen(
                     placeholder = "Enter announcement details",
                     isValid = {
                         setDescriptionValid(it)
-                    })
+                    }
+                )
                 TextInput(
                     value = date,
                     onValueChange = setDate,
@@ -213,7 +215,7 @@ fun HrAnnouncementFormScreen(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Column(modifier = Modifier.fillMaxWidth()) {
-                    androidx.compose.material3.Text(
+                    Text(
                         text = "Role",
                         fontSize = 14.sp,
                         fontWeight = FontWeight.SemiBold,

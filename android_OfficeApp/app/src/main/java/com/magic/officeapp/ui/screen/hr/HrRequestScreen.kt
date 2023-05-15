@@ -1,17 +1,28 @@
-package com.magic.officeapp.ui.screen.employee
+package com.magic.officeapp.ui.screen.hr
 
 import android.os.Build
 import android.util.Log
-import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Card
 import androidx.compose.material.Divider
+import androidx.compose.material.Icon
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
@@ -26,63 +37,52 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.magic.officeapp.R
-import com.magic.officeapp.data.model.response.AttendanceResponseDataItem
-import com.magic.officeapp.ui.component.CardAttendance
+import com.magic.officeapp.data.model.response.announcement.DataItem
+import com.magic.officeapp.data.model.response.request.GetAllRequestsDataItem
+import com.magic.officeapp.ui.component.CardRequests
 import com.magic.officeapp.ui.component.CustomButton
-import com.magic.officeapp.ui.viewmodel.AttendanceViewModel
-import com.magic.officeapp.ui.viewmodel.AuthViewModel
-import com.magic.officeapp.utils.Attendance
-import com.magic.officeapp.utils.attendanceSummary
+import com.magic.officeapp.ui.component.TextInput
+import com.magic.officeapp.ui.navigation.Screen
+import com.magic.officeapp.ui.viewmodel.RequestViewModel
 import com.magic.officeapp.utils.constants.Result
-import com.magic.officeapp.utils.stateAttendance
-import java.time.LocalDateTime
-import java.time.ZoneId
-import java.time.ZoneOffset
-import java.time.format.DateTimeFormatter
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun AttendanceScreen(
+fun HrRequestScreen(
     navController: NavController = rememberNavController(),
-    authViewModel: AuthViewModel = hiltViewModel(),
-    attendanceViewModel: AttendanceViewModel = hiltViewModel()
+    requestViewModel: RequestViewModel = hiltViewModel()
 ) {
-    val user = authViewModel.userData.collectAsState().value
-    var attendanceList = emptyList<AttendanceResponseDataItem>()
-    val attendanceSummary = attendanceViewModel.attendanceSummary.collectAsState().value
-
-    val attendanceState = attendanceViewModel.attendanceState.collectAsState().value
-
-    if (user?.jwt != null) {
-        attendanceViewModel.getAttendanceUser(user.id.toString())
+    var (search, setSearch) = remember {
+        mutableStateOf("")
     }
 
-    when (attendanceState) {
+    var requests = requestViewModel.getAllRequestsResponse.collectAsState().value
+    var data :  List<GetAllRequestsDataItem> = emptyList()
+    requestViewModel.getAllRequests()
+    when (requests) {
         is Result.Success -> {
-            attendanceList = attendanceState?.data?.data as List<AttendanceResponseDataItem>
+            data = requests.data.data as List<GetAllRequestsDataItem>
         }
         is Result.Error -> {
-            Toast.makeText(navController.context, attendanceState.message, Toast.LENGTH_SHORT)
-                .show()
+            Log.d("TAG", "AnnouncementScreen: ${requests.message}")
         }
         else -> {
+
         }
     }
-
-
     LazyColumn(
         modifier = Modifier
-            .padding(start = 24.dp, end = 24.dp)
             .fillMaxSize()
+            .padding(start = 24.dp, end = 24.dp)
     ) {
         item {
             Row(
                 modifier = Modifier
                     .padding(top = 52.dp)
-                    .fillMaxWidth()
                     .clickable {
                         navController.popBackStack()
                     }, verticalAlignment = Alignment.CenterVertically
@@ -94,17 +94,15 @@ fun AttendanceScreen(
                 )
 
                 Text(
-                    text = "Attendance",
+                    text = "Requests Activity",
                     fontSize = 20.sp,
                     fontWeight = FontWeight.SemiBold,
                     modifier = Modifier.padding(start = 8.dp)
                 )
             }
-        }
-        item {
+            Spacer(modifier = Modifier.height(20.dp))
             Row(
                 modifier = Modifier
-                    .padding(top = 40.dp)
                     .fillMaxWidth()
                     .border(1.dp, Color("#E5E5E5".toColorInt()), RoundedCornerShape(6.dp))
                     .padding(top = 21.dp, bottom = 21.dp, start = 16.dp, end = 16.dp),
@@ -115,13 +113,13 @@ fun AttendanceScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = attendanceSummary?.present.toString(),
+                        text = "12",
                         fontSize = 32.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color("#37A345".toColorInt())
                     )
                     Text(
-                        text = "Present",
+                        text = "Accepted",
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color("#858D9D".toColorInt())
@@ -133,13 +131,13 @@ fun AttendanceScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = attendanceSummary?.permit.toString(),
+                        text = "12",
                         fontSize = 32.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color("#E5B200".toColorInt())
                     )
                     Text(
-                        text = "Permit",
+                        text = "Waiting",
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color("#858D9D".toColorInt())
@@ -151,30 +149,30 @@ fun AttendanceScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = attendanceSummary?.absent.toString(),
+                        text = "12",
                         fontSize = 32.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color("#D3221E".toColorInt())
                     )
                     Text(
-                        text = "Leave",
+                        text = "Rejected",
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color("#858D9D".toColorInt())
                     )
                 }
             }
-        }
-        item {
+
+
             Row(
                 modifier = Modifier
-                    .padding(top = 40.dp)
+                    .padding(top = 32.dp)
                     .fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Recent Attendance",
+                    text = "Recent Request",
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
                 )
@@ -183,57 +181,61 @@ fun AttendanceScreen(
                     modifier = Modifier
                         .height(32.dp)
                         .width(95.dp),
-                    onClick = { /*TODO*/ },
+                    onClick = {
+                    },
                     text = "Filter",
                     IconButton = R.drawable.ic_outline_filter_list
                 )
             }
-
+            Column {
+                Spacer(modifier = Modifier.height(16.dp))
+                TextInput(
+                    value = search,
+                    onValueChange = {
+                        setSearch(it)
+                    },
+                    placeholder = "Search Item",
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Default.Search,
+                            contentDescription = "Search Icon"
+                        )
+                    }
+                )
+            }
         }
-
-        attendanceList.map { attendance ->
+        data.map { request ->
             item {
-                if (attendance?.attributes?.checkOut != null) {
-                    CardAttendance(
-                        created_at = attendance.attributes.checkOut,
-                        Status = "Check Out",
-                        State = stateAttendance("Check Out", attendance.attributes.checkOut),
-                        onClick = { /*TODO*/ }
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 10.dp)
+                ) {
+                    CardRequests(
+                        title = if (request.attributes?.requestType == "permit") "Request Permit" else "Other Request",
+                        created_at = request.attributes?.createdAt.toString(),
+                        Status = request.attributes?.isApproved.toString(),
+                        onClick = {
+                            navController.navigate(Screen.HrRequestDetailScreen.route+ "/${request.id}")
+                        },
+                        requestType = request.attributes?.requestType.toString(),
                     )
 
                     Divider(
                         modifier = Modifier
-                            .height(1.dp)
-                            .fillMaxWidth(),
+                            .fillMaxWidth()
+                            .height(1.dp),
                         color = Color("#F0F1F3".toColorInt())
                     )
                 }
-
-                CardAttendance(
-                    created_at = attendance?.attributes?.createdAt!!,
-                    Status = "Check In",
-                    State = stateAttendance("Check In", attendance?.attributes?.createdAt!!),
-                    onClick = { /*TODO*/ }
-                )
-
-                Divider(
-                    modifier = Modifier
-                        .height(1.dp)
-                        .fillMaxWidth(),
-                    color = Color("#F0F1F3".toColorInt())
-                )
             }
         }
 
-        item {
-            Spacer(modifier = Modifier.padding(bottom = 100.dp))
-        }
     }
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
-fun PreviewAttendanceScreen() {
-    AttendanceScreen()
+fun HrRequestScreen() {
+    HrAnnouncementScreen()
 }
-

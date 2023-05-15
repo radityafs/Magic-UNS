@@ -3,6 +3,7 @@ package com.magic.officeapp.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.magic.officeapp.data.model.response.AddAnnouncementResponse
+import com.magic.officeapp.data.model.response.UserListResponseItem
 import com.magic.officeapp.data.model.response.announcement.AnnouncementsResponse
 import com.magic.officeapp.data.repository.AnnouncementRepository
 import com.magic.officeapp.utils.constants.Result
@@ -28,6 +29,16 @@ class AnnouncementViewModel @Inject constructor(
         MutableStateFlow<Result<AddAnnouncementResponse>>(Result.Empty)
     val addAnnouncementState get() = _addAnnouncementState
 
+    private val _announcementData = MutableStateFlow<Result<AnnouncementsResponse>>(Result.Empty)
+    val announcementData get() = _announcementData
+
+    fun getAllAnnouncement(token:String="") {
+        viewModelScope.launch {
+            _loading.value = true
+            _announcementData.value = repository.getAllAnnouncements(token=token)
+            _loading.value = false
+        }
+    }
     fun getAnnouncementUser(
         userId: String,
         jobRoleId: String

@@ -23,6 +23,7 @@ fun CustomButton(
     text: String = "Button",
     modifier: Modifier = Modifier,
     IconButton: Int? = null,
+    textModifier: Modifier = Modifier,
 ) {
     Button(
         onClick = onClick, modifier = modifier, colors = ButtonDefaults.buttonColors(
@@ -44,7 +45,7 @@ fun CustomButton(
                         .padding(end = 8.dp)
                 )
             }
-            Text(text = text)
+            Text(text = text, modifier = textModifier)
         }
 
     }

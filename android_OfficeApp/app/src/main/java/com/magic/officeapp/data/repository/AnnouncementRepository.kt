@@ -12,6 +12,14 @@ import com.magic.officeapp.utils.constants.Result
 class AnnouncementRepository @Inject constructor(
     private val apiService: ApiAnnouncementInterface
 ) {
+    suspend fun getAllAnnouncements(token: String = ""): Result<AnnouncementsResponse> {
+        return try {
+            Result.Success(apiService.getAnnouncements(token=token))
+        } catch (err: Exception) {
+            Log.e("err", err.message.toString())
+            Result.Error(err.message.toString())
+        }
+    }
 
     suspend fun getUserAnnouncement(
         userId: String,
