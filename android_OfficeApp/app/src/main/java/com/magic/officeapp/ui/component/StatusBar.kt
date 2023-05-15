@@ -15,8 +15,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
-import com.magic.officeapp.ui.theme.Green100
-import com.magic.officeapp.ui.theme.Yellow100
+import com.magic.officeapp.ui.theme.*
 
 @Composable
 fun StatusBar(
@@ -25,9 +24,9 @@ fun StatusBar(
 ) {
 
    val contentColor = when(color){
-        Yellow100 -> Color("#E5B200".toColorInt())
-        Green100 -> Color("#37A345".toColorInt())
-        else -> Color("#E54240".toColorInt())
+        Yellow100 -> Yellow500
+        Green100 -> Green500
+        else -> Red500
     }
 
     Row(
@@ -41,7 +40,7 @@ fun StatusBar(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center
     ) {
-        Text(text = label, color = contentColor, fontSize = 11.sp)
+        Text(text = label.capitalize(), color = contentColor, fontSize = 11.sp, letterSpacing = 0.5.sp)
     }
 }
 

@@ -1,11 +1,8 @@
 package com.magic.officeapp.data.api
 
-import com.magic.officeapp.data.model.LoginResponse
-import com.magic.officeapp.data.model.request.LoginRequest
 import com.magic.officeapp.data.model.request.RegisterEmployeeRequest
 import com.magic.officeapp.data.model.response.JobRolesResponse
 import com.magic.officeapp.data.model.response.RegisterEmployeeResponse
-import com.magic.officeapp.data.model.response.UserListResponse
 import com.magic.officeapp.data.model.response.UserListResponseItem
 import retrofit2.http.Body
 import retrofit2.http.GET

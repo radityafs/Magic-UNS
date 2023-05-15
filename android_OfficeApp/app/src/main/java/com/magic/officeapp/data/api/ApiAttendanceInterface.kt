@@ -7,6 +7,7 @@ import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.POST
+import retrofit2.http.PUT
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -15,7 +16,7 @@ interface ApiAttendanceInterface {
     @GET("/api/location")
     suspend fun getApiLocation(): LocationResponse
 
-    @GET("/api/attendances/?populate=user&sort=publishedAt:desc&pagination[pageSize]=100")
+    @GET("/api/attendances/?populate=user&sort=createdAt:desc&pagination[pageSize]=100")
     suspend fun getAttendance(
         @Header("Authorization") token: String = ""
     ): AttendanceResponse
@@ -25,7 +26,7 @@ interface ApiAttendanceInterface {
         @Header("Authorization") token: String = "",
         @Query("populate") populate: String = "user",
         @Query("filters[user][id][\$eq]") userId: String,
-        @Query("sort") sort: String = "publishedAt:desc",
+        @Query("sort") sort: String = "createdAt:desc",
         @Query("pagination[pageSize]") pageSize: Int = 100
     ): AttendanceResponse
 
@@ -42,13 +43,20 @@ interface ApiAttendanceInterface {
         @Query("filters[user][id][\$eq]") userId: String,
         @Query("filters[publishedAt][\$gte]") startDate: String,
         @Query("filters[publishedAt][\$lte]") endDate: String,
-        @Query("sort") sort: String = "publishedAt:desc",
+        @Query("sort") sort: String = "createdAt:desc",
         @Query("pagination[pageSize]") pageSize: Int = 100
     ): AttendanceResponse
 
     @POST("/api/attendances")
     suspend fun postAttendance(
         @Header("Authorization") token: String = "",
+        @Body attendanceRequest: AttendanceRequest
+    ): AttendanceResponse
+
+    @PUT("/api/attendances/{id}")
+    suspend fun putAttendance(
+        @Header("Authorization") token: String = "",
+        @Path("id") id: String,
         @Body attendanceRequest: AttendanceRequest
     ): AttendanceResponse
 }

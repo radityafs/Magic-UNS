@@ -18,5 +18,8 @@ data class DataAttendanceRequest(
 	val latitude: String? = null,
 
 	@field:SerializedName("permit")
-	val permit: Boolean? = false
+	val permit: Boolean? = false,
+
+	@field:SerializedName("check_out")
+	val checkOut: String? = null
 )

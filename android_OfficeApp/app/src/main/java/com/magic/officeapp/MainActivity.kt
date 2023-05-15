@@ -177,9 +177,17 @@ class MainActivity : ComponentActivity() {
                                             location.longitude.toString()
                                         )
 
-                                        Toast.makeText(
-                                            this, "Check in success", Toast.LENGTH_SHORT
-                                        ).show()
+                                        dialogItem.value = DialogItem(
+                                            backgroundButton = Green700,
+                                            icon = R.drawable.state_success,
+                                            title = "Check In Success",
+                                            message = "Let's work together to achieve our goals and make a positive impact. We got this!",
+                                            onConfirmAction = {
+                                                showDialog.value = false
+                                            },
+                                            iconBackgroundColor = Green100,
+                                        )
+                                        showDialog.value = true
                                     } else {
                                         Toast.makeText(
                                             this, "Please turn on your location", Toast.LENGTH_SHORT
@@ -293,7 +301,6 @@ class MainActivity : ComponentActivity() {
                             composable(Screen.ProfileScreen.route) {
                                 ProfileScreen(navController = navController)
                             }
-
 
                             // HR
                             composable(Screen.HRHomeScreen.route) {

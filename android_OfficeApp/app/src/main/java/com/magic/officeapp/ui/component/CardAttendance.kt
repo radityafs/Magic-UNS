@@ -1,6 +1,7 @@
 package com.magic.officeapp.ui.component
 
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -14,31 +15,34 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
 import com.magic.officeapp.R
-import com.magic.officeapp.ui.theme.Green100
-import com.magic.officeapp.ui.theme.Red100
-import com.magic.officeapp.ui.theme.Yellow100
+import com.magic.officeapp.ui.theme.*
 import com.magic.officeapp.utils.constants.utcToFormat
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun CardAttendance(
-    title: String,
     created_at: String = "2021-08-12T00:00:00.000Z",
-    requestType: String = "permit",
     Status: String = "Start",
+    State : String = "On Time",
     onClick : () -> Unit = {}
 ) {
 
     val backgroundColor = when (Status) {
-        "waiting" -> Yellow100
-        "approved" -> Green100
+        "Check In" -> Green100
         else -> Red100
     }
 
-    val icon = when (requestType) {
-        "permit" -> R.drawable.request_icon
-        else -> R.drawable.icon_document
+    val icon = when (Status) {
+        "Check In" -> R.drawable.icon_leave_green
+        else -> R.drawable.attendance_icon
     }
+
+    val backgroundStatus = when(State){
+        "On Time" -> Green100
+        "Late" -> Red100
+        else -> Yellow100
+    }
+
 
     val formattedDate = utcToFormat(created_at, "dd MMMM yyyy")
     val formattedTime = utcToFormat(created_at, "HH:mm a")
@@ -66,7 +70,7 @@ fun CardAttendance(
                 modifier = Modifier.padding(start = 16.dp)
             ) {
                 Text(
-                    text = title,
+                    text = Status,
                     color = Color("#292D35".toColorInt()),
                     fontSize = 16.sp,
                     modifier = Modifier.padding(bottom = 8.dp),
@@ -88,7 +92,7 @@ fun CardAttendance(
                 modifier = Modifier.padding(bottom = 12.dp),
                 fontWeight = FontWeight.W600
             )
-            StatusBar(label = Status, color = backgroundColor)
+            StatusBar(label = State, color = backgroundStatus)
         }
 
     }

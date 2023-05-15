@@ -1,58 +1,102 @@
 package com.magic.officeapp.data.model.response
 
-import kotlinx.parcelize.Parcelize
-import android.os.Parcelable
+import com.google.gson.annotations.SerializedName
 
-@Parcelize
 data class AttendanceResponse(
-	val data: List<DataItem?>? = null,
-	val meta: Meta? = null
-) : Parcelable
 
-@Parcelize
-data class Pagination(
-	val pageCount: Int? = null,
-	val total: Int? = null,
-	val pageSize: Int? = null,
-	val page: Int? = null
-) : Parcelable
+	@field:SerializedName("data")
+	val data: List<AttendanceResponseDataItem?>? = null,
 
-@Parcelize
+	@field:SerializedName("meta")
+	val meta: AttendanceResponseMeta? = null
+)
+
 data class AttendanceResponseUser(
-	val data: Data? = null
-) : Parcelable
 
-@Parcelize
-data class Data(
-	val attributes: Attributes? = null,
+	@field:SerializedName("data")
+	val data: AttendanceResponseData? = null
+)
+
+data class AttendanceResponseDataItem(
+
+	@field:SerializedName("attributes")
+	val attributes: AttendanceResponseAttributes? = null,
+
+	@field:SerializedName("id")
 	val id: Int? = null
-) : Parcelable
+)
 
-@Parcelize
-data class DataItem(
-	val attributes: Attributes? = null,
+data class AttendanceResponseData(
+
+	@field:SerializedName("attributes")
+	val attributes: AttendanceResponseAttributes? = null,
+
+	@field:SerializedName("id")
 	val id: Int? = null
-) : Parcelable
+)
 
-@Parcelize
-data class Meta(
-	val pagination: Pagination? = null
-) : Parcelable
+data class AttendanceResponseAttributes(
 
-@Parcelize
-data class Attributes(
+	@field:SerializedName("createdAt")
 	val createdAt: String? = null,
+
+	@field:SerializedName("check_out")
+	val checkOut: String? = null,
+
+	@field:SerializedName("publishedAt")
 	val publishedAt: String? = null,
+
+	@field:SerializedName("latitude")
 	val latitude: String? = null,
+
+	@field:SerializedName("user")
 	val user: AttendanceResponseUser? = null,
-	val updatedAt: String? = null,
+
+	@field:SerializedName("longitude")
 	val longitude: String? = null,
-	val jobRole: String? = null,
+
+	@field:SerializedName("updatedAt")
+	val updatedAt: String? = null,
+
+	@field:SerializedName("blocked")
 	val blocked: Boolean? = null,
+
+	@field:SerializedName("provider")
 	val provider: String? = null,
+
+	@field:SerializedName("phone")
 	val phone: String? = null,
+
+	@field:SerializedName("salary")
 	val salary: String? = null,
+
+	@field:SerializedName("confirmed")
 	val confirmed: Boolean? = null,
+
+	@field:SerializedName("email")
 	val email: String? = null,
+
+	@field:SerializedName("username")
 	val username: String? = null
-) : Parcelable
+)
+
+data class AttendanceResponseMeta(
+
+	@field:SerializedName("pagination")
+	val pagination: AttendanceResponsePagination? = null
+)
+
+data class AttendanceResponsePagination(
+
+	@field:SerializedName("pageCount")
+	val pageCount: Int? = null,
+
+	@field:SerializedName("total")
+	val total: Int? = null,
+
+	@field:SerializedName("pageSize")
+	val pageSize: Int? = null,
+
+	@field:SerializedName("page")
+	val page: Int? = null
+)

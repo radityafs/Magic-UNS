@@ -1,6 +1,9 @@
 package com.magic.officeapp.ui.screen.employee
 
+import android.os.Build
+import android.util.Log
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -11,6 +14,8 @@ import androidx.compose.material.Divider
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -24,12 +29,21 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.magic.officeapp.R
-import com.magic.officeapp.data.model.response.DataItem
+import com.magic.officeapp.data.model.response.AttendanceResponseDataItem
+import com.magic.officeapp.ui.component.CardAttendance
 import com.magic.officeapp.ui.component.CustomButton
 import com.magic.officeapp.ui.viewmodel.AttendanceViewModel
 import com.magic.officeapp.ui.viewmodel.AuthViewModel
+import com.magic.officeapp.utils.Attendance
+import com.magic.officeapp.utils.attendanceSummary
 import com.magic.officeapp.utils.constants.Result
+import com.magic.officeapp.utils.stateAttendance
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun AttendanceScreen(
     navController: NavController = rememberNavController(),
@@ -37,23 +51,25 @@ fun AttendanceScreen(
     attendanceViewModel: AttendanceViewModel = hiltViewModel()
 ) {
     val user = authViewModel.userData.collectAsState().value
-    var attendanceList = emptyList<DataItem>()
+    var attendanceList = emptyList<AttendanceResponseDataItem>()
+    val attendanceSummary = attendanceViewModel.attendanceSummary.collectAsState().value
+
     val attendanceState = attendanceViewModel.attendanceState.collectAsState().value
 
     if (user?.jwt != null) {
         attendanceViewModel.getAttendanceUser(user.id.toString())
     }
 
-
-    when(attendanceState){
+    when (attendanceState) {
         is Result.Success -> {
-            val data = attendanceState.data.data
-            attendanceList = data as List<DataItem>
+            attendanceList = attendanceState?.data?.data as List<AttendanceResponseDataItem>
         }
         is Result.Error -> {
-            Toast.makeText(navController.context, attendanceState.message, Toast.LENGTH_SHORT).show()
+            Toast.makeText(navController.context, attendanceState.message, Toast.LENGTH_SHORT)
+                .show()
         }
-        else -> {}
+        else -> {
+        }
     }
 
 
@@ -99,7 +115,7 @@ fun AttendanceScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "12",
+                        text = attendanceSummary?.present.toString(),
                         fontSize = 32.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color("#37A345".toColorInt())
@@ -117,13 +133,13 @@ fun AttendanceScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "5",
+                        text = attendanceSummary?.permit.toString(),
                         fontSize = 32.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color("#E5B200".toColorInt())
                     )
                     Text(
-                        text = "Absent",
+                        text = "Permit",
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color("#858D9D".toColorInt())
@@ -135,7 +151,7 @@ fun AttendanceScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "12",
+                        text = attendanceSummary?.absent.toString(),
                         fontSize = 32.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color("#D3221E".toColorInt())
@@ -175,27 +191,39 @@ fun AttendanceScreen(
 
         }
 
-//        items(4, key = { index -> index }) { index ->
-//            Column(
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//                    .padding(top = 10.dp)
-//            ) {
-//                CustomCard(
-//                    title = "Request",
-//                    created_at = "2021-09-09 12:00:00",
-//                    onClick = {},
-//                    requestType = "rahasia"
-//                )
-//
-//                Divider(
-//                    modifier = Modifier
-//                        .fillMaxWidth()
-//                        .height(1.dp),
-//                    color = Color("#F0F1F3".toColorInt())
-//                )
-//            }
-//        }
+        attendanceList.map { attendance ->
+            item {
+                if (attendance?.attributes?.checkOut != null) {
+                    CardAttendance(
+                        created_at = attendance.attributes.checkOut,
+                        Status = "Check Out",
+                        State = stateAttendance("Check Out", attendance.attributes.checkOut),
+                        onClick = { /*TODO*/ }
+                    )
+
+                    Divider(
+                        modifier = Modifier
+                            .height(1.dp)
+                            .fillMaxWidth(),
+                        color = Color("#F0F1F3".toColorInt())
+                    )
+                }
+
+                CardAttendance(
+                    created_at = attendance?.attributes?.createdAt!!,
+                    Status = "Check In",
+                    State = stateAttendance("Check In", attendance?.attributes?.createdAt!!),
+                    onClick = { /*TODO*/ }
+                )
+
+                Divider(
+                    modifier = Modifier
+                        .height(1.dp)
+                        .fillMaxWidth(),
+                    color = Color("#F0F1F3".toColorInt())
+                )
+            }
+        }
 
         item {
             Spacer(modifier = Modifier.padding(bottom = 100.dp))
@@ -203,8 +231,3 @@ fun AttendanceScreen(
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun AttendanceScreenPreview() {
-    AttendanceScreen()
-}

@@ -3,6 +3,7 @@ package com.magic.officeapp.utils
 import android.content.Context
 import com.google.gson.Gson
 import com.magic.officeapp.R
+import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.InputStream
 
 data class Holiday(
@@ -10,17 +11,111 @@ data class Holiday(
     val name: String
 )
 
-fun readJsonFromRaw(context: Context, rawResourceId: Int): String {
-    val inputStream: InputStream = context.resources.openRawResource(rawResourceId)
-    val jsonBytes = ByteArray(inputStream.available())
-    inputStream.read(jsonBytes)
-    inputStream.close()
-
-    return String(jsonBytes)
-}
-
-fun isHoliday(context: Context, date: String): Boolean {
-    val holidayData = readJsonFromRaw(context, R.raw.holiday)
+fun isHoliday(date: String): Boolean {
+    val holidayData = """
+        [
+          {
+            "date": "2023-01-01",
+            "name": "Hari Tahun Baru"
+          },
+          {
+            "date": "2023-01-22",
+            "name": "Tahun Baru Imlek"
+          },
+          {
+            "date": "2023-01-23",
+            "name": "Cuti Bersama Tahun Baru Imlek"
+          },
+          {
+            "date": "2023-02-18",
+            "name": "Isra Mikraj Nabi Muhammad"
+          },
+          {
+            "date": "2023-03-22",
+            "name": "Hari Suci Nyepi (Tahun Baru Saka)"
+          },
+          {
+            "date": "2023-03-23",
+            "name": "Cuti Bersama Hari Suci Nyepi (Tahun Baru Saka)"
+          },
+          {
+            "date": "2023-04-07",
+            "name": "Wafat Isa Almasih"
+          },
+          {
+            "date": "2023-04-19",
+            "name": "Cuti Bersama Idul Fitri"
+          },
+          {
+            "date": "2023-04-20",
+            "name": "Cuti Bersama Idul Fitri"
+          },
+          {
+            "date": "2023-04-22",
+            "name": "Hari Idul Fitri"
+          },
+          {
+            "date": "2023-04-23",
+            "name": "Hari Idul Fitri"
+          },
+          {
+            "date": "2023-04-24",
+            "name": "Cuti Bersama Idul Fitri"
+          },
+          {
+            "date": "2023-04-25",
+            "name": "Cuti Bersama Idul Fitri"
+          },
+          {
+            "date": "2023-05-01",
+            "name": "Hari Buruh Internasional / Pekerja"
+          },
+          {
+            "date": "2023-05-18",
+            "name": "Kenaikan Isa Al Masih"
+          },
+          {
+            "date": "2023-06-01",
+            "name": "Hari Lahir Pancasila"
+          },
+          {
+            "date": "2023-06-02",
+            "name": "Cuti Bersama Waisak"
+          },
+          {
+            "date": "2023-06-04",
+            "name": "Hari Raya Waisak"
+          },
+          {
+            "date": "2023-06-29",
+            "name": "Idul Adha (Lebaran Haji)"
+          },
+          {
+            "date": "2023-07-19",
+            "name": "Satu Muharam / Tahun Baru Hijriah"
+          },
+          {
+            "date": "2023-08-17",
+            "name": "Hari Proklamasi Kemerdekaan R.I."
+          },
+          {
+            "date": "2023-12-24",
+            "name": "Malam Natal"
+          },
+          {
+            "date": "2023-12-25",
+            "name": "Hari Raya Natal"
+          },
+          {
+            "date": "2023-12-26",
+            "name": "Cuti Bersama Natal (Hari Tinju)"
+          },
+          {
+            "date": "2023-12-31",
+            "name": "Malam Tahun Baru"
+          }
+        ]
+    """.trimIndent()
 
     val arrayHoliday = Gson().fromJson(holidayData, Array<Holiday>::class.java)
 
@@ -33,16 +128,3 @@ fun isHoliday(context: Context, date: String): Boolean {
     return false
 }
 
-fun getHolidayName(context: Context, date: String): String {
-    val holidayData = readJsonFromRaw(context, R.raw.holiday)
-
-    val arrayHoliday = Gson().fromJson(holidayData, Array<Holiday>::class.java)
-
-    arrayHoliday.forEach {
-        if (it.date == date) {
-            return it.name
-        }
-    }
-
-    return ""
-}
