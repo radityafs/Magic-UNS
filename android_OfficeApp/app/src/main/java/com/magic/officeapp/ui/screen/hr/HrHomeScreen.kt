@@ -1,6 +1,7 @@
 package com.magic.officeapp.ui.screen.hr
 
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
@@ -14,6 +15,8 @@ import androidx.compose.material.Divider
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -28,6 +31,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.magic.officeapp.R
+import com.magic.officeapp.data.model.response.request.GetAllRequestsDataItem
+import com.magic.officeapp.data.model.response.request.GetRequestByIdData
 import com.magic.officeapp.ui.component.CustomIcon
 import com.magic.officeapp.ui.navigation.Screen
 import com.magic.officeapp.ui.theme.Green100
@@ -35,6 +40,7 @@ import com.magic.officeapp.ui.theme.Grey100
 import com.magic.officeapp.ui.theme.Red100
 import com.magic.officeapp.ui.viewmodel.AuthViewModel
 import com.magic.officeapp.ui.viewmodel.EmployeeViewModel
+import com.magic.officeapp.ui.viewmodel.RequestViewModel
 import java.sql.Time
 import java.text.SimpleDateFormat
 import com.magic.officeapp.utils.constants.Result
@@ -44,19 +50,40 @@ import com.magic.officeapp.utils.constants.Result
 fun HrHomeScreen(
     navController: NavController = rememberNavController(),
     authViewModel: AuthViewModel = hiltViewModel(),
-    employeeViewModel: EmployeeViewModel = hiltViewModel()
+    employeeViewModel: EmployeeViewModel = hiltViewModel(),
+    requestViewModel: RequestViewModel = hiltViewModel(),
 ) {
+    var (requestsCount, setRequestsCount) = remember {
+        mutableStateOf(0)
+    }
     val user = authViewModel.userData.collectAsState()
 
     if (user?.value?.jwt != null) {
         employeeViewModel.getEmployeeList(user.value?.jwt ?: "")
+        requestViewModel.getAllRequests()
     }
 
     val loading = employeeViewModel.loading.collectAsState()
     val employeeData = employeeViewModel.employeeData.collectAsState()
-
+    val requests = requestViewModel.getAllRequestsResponse.collectAsState().value
     val currentHour = Time(System.currentTimeMillis()).hours
 
+    var data :  List<GetAllRequestsDataItem> = emptyList()
+
+    when (requests) {
+        is Result.Success -> {
+            data = requests.data.data as List<GetAllRequestsDataItem>
+            setRequestsCount(data.filter { it.attributes?.isApproved == "waiting" }.size)
+        }
+
+        is Result.Error -> {
+            Log.d("TAG", "AnnouncementScreen: ${requests.message}")
+        }
+
+        else -> {
+
+        }
+    }
     fun greeting(
         username: String = "Employee",
     ): String {
@@ -161,7 +188,7 @@ fun HrHomeScreen(
 
                         Row(modifier = Modifier.fillMaxWidth()) {
                             Text(
-                                "43",
+                                text = requestsCount.toString(),
                                 fontSize = 40.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = Color.White

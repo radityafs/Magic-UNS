@@ -56,9 +56,9 @@ class AnnouncementViewModel @Inject constructor(
     fun addAnnouncement(
         title: String,
         description: String,
-        date: String,
-        Role: Int?,
-        userId: Int?,
+        date: String = "2023-10-12",
+        Role: Int? = 2,
+        userId: Int? = 1,
     ) {
         viewModelScope.launch {
             _loading.value = true

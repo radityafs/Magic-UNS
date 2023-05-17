@@ -304,6 +304,11 @@ class MainActivity : ComponentActivity() {
                                 ProfileScreen(navController = navController)
                             }
 
+                            composable(Screen.RequestDetailScreen.route+"/{id}") {
+                                val id = it.arguments?.getString("id")?.toInt()
+                                RequestDetailScreen(navController = navController,id=id!!)
+                            }
+
                             // HR
                             composable(Screen.HRHomeScreen.route) {
                                 HrHomeScreen(navController = navController)

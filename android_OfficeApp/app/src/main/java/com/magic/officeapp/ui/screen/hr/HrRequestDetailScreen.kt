@@ -37,6 +37,7 @@ import com.magic.officeapp.ui.component.CustomButton
 import com.magic.officeapp.ui.component.TextInput
 import com.magic.officeapp.ui.navigation.Screen
 import com.magic.officeapp.ui.screen.LoadingScreen
+import com.magic.officeapp.ui.viewmodel.AnnouncementViewModel
 import com.magic.officeapp.ui.viewmodel.RequestViewModel
 import com.magic.officeapp.utils.constants.Result
 import com.magic.officeapp.utils.constants.utcToFormat
@@ -46,7 +47,8 @@ import com.magic.officeapp.utils.constants.utcToFormat
 fun HrRequestDetailScreen(
     navController: NavController = rememberNavController(),
     id: Int,
-    requestViewModel: RequestViewModel = hiltViewModel()
+    requestViewModel: RequestViewModel = hiltViewModel(),
+    announcementViewModel: AnnouncementViewModel = hiltViewModel()
 ) {
     var (isWaiting, setIsWaiting) = remember {
         mutableStateOf(true)
@@ -108,6 +110,13 @@ fun HrRequestDetailScreen(
             isApproved = "rejected",
             feedback = feedback
         )
+
+        announcementViewModel.addAnnouncement(
+            title = "Request Rejected",
+            description = "Your request have been rejected by HR",
+            userId = data?.attributes?.user?.data?.id,
+        )
+
         navController.navigate(Screen.HrRequestScreen.route)
     }
 
@@ -116,6 +125,12 @@ fun HrRequestDetailScreen(
             id = id,
             isApproved = "approved",
             feedback = feedback
+        )
+
+        announcementViewModel.addAnnouncement(
+            title = "Request Approved",
+            description = "Your request have been approved by HR",
+            userId = data?.attributes?.user?.data?.id,
         )
         navController.navigate(Screen.HrRequestScreen.route)
     }

@@ -69,7 +69,7 @@ fun HrRequestScreen(
         mutableStateOf(0)
     }
     var requests = requestViewModel.getAllRequestsResponse.collectAsState().value
-    var data :  List<GetAllRequestsDataItem> = emptyList()
+    var data: List<GetAllRequestsDataItem> = emptyList()
     requestViewModel.getAllRequests()
     when (requests) {
         is Result.Success -> {
@@ -79,9 +79,11 @@ fun HrRequestScreen(
             setPendingRequest(data.filter { it.attributes?.isApproved == "waiting" }.size)
             setRejectedRequest(data.filter { it.attributes?.isApproved == "rejected" }.size)
         }
+
         is Result.Error -> {
             Log.d("TAG", "AnnouncementScreen: ${requests.message}")
         }
+
         else -> {
 
         }
@@ -228,7 +230,7 @@ fun HrRequestScreen(
                         created_at = request.attributes?.createdAt.toString(),
                         Status = request.attributes?.isApproved.toString(),
                         onClick = {
-                            navController.navigate(Screen.HrRequestDetailScreen.route+ "/${request.id}")
+                            navController.navigate(Screen.HrRequestDetailScreen.route + "/${request.id}")
                         },
                         requestType = request.attributes?.requestType.toString(),
                     )
