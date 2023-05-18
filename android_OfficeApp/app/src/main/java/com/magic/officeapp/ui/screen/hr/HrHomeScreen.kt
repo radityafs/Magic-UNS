@@ -312,7 +312,7 @@ fun HrHomeScreen(
 
                     Column(horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier.clickable {
-                            navController.navigate(Screen.PayrollScreen.route)
+                            navController.navigate(Screen.HrPayrollScreen.route)
                         }) {
                         CustomIcon(
                             icon = R.drawable.payroll_icon,

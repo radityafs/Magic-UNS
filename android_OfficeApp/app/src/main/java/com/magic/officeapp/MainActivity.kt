@@ -34,6 +34,7 @@ import com.magic.officeapp.ui.screen.hr.HrAnnouncementFormScreen
 import com.magic.officeapp.ui.screen.hr.HrAnnouncementScreen
 import com.magic.officeapp.ui.screen.hr.HrEmployeeListScreen
 import com.magic.officeapp.ui.screen.hr.HrHomeScreen
+import com.magic.officeapp.ui.screen.hr.HrPayrollScreen
 import com.magic.officeapp.ui.screen.hr.HrRequestDetailScreen
 import com.magic.officeapp.ui.screen.hr.HrRequestScreen
 import com.magic.officeapp.ui.theme.*
@@ -337,6 +338,10 @@ class MainActivity : ComponentActivity() {
                             composable(Screen.HrRequestDetailScreen.route + "/{id}") {backStackEntry ->
                                 val id = backStackEntry.arguments?.getString("id")?.toInt()
                                 HrRequestDetailScreen(navController = navController, id = id!!)
+                            }
+
+                            composable(Screen.HrPayrollScreen.route) {
+                                HrPayrollScreen(navController = navController)
                             }
                         }
                     }
