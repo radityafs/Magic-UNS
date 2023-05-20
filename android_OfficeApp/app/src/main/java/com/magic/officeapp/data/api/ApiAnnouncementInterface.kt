@@ -17,7 +17,7 @@ interface ApiAnnouncementInterface {
         @Body request: AddAnnouncementRequest
     ): AddAnnouncementResponse
 
-    @GET("/api/announcements?populate=*&filters[user][id][\$null]=true&sort=createAt:desc")
+    @GET("/api/announcements?populate=*&filters[user][id][\$null]=true&sort[1]=createdAt%3Adesc")
     suspend fun getAnnouncements(
         @Header("Authorization") token: String = ""
     ): AnnouncementsResponse
@@ -28,7 +28,7 @@ interface ApiAnnouncementInterface {
         @Query("populate") populate: String = "*",
         @Query("filters[\$or][0][user][id][\$eq]") userId: String,
         @Query("filters[\$or][1][job_roles][id][\$eq]") jobRoleId: String,
-        @Query("sort") sort: String = "createdAt:desc",
+        @Query("sort[1]") sort: String = "createdAt:desc",
     ): AnnouncementsResponse
 
 }

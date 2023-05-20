@@ -2,6 +2,7 @@ package com.magic.officeapp.ui.screen.employee
 
 import android.annotation.SuppressLint
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
@@ -25,10 +26,12 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.magic.officeapp.R
 import com.magic.officeapp.data.model.response.AttendanceResponseDataItem
+import com.magic.officeapp.data.model.response.announcement.DataItem
 import com.magic.officeapp.ui.component.CardAttendance
 import com.magic.officeapp.ui.component.Menu
 import com.magic.officeapp.ui.navigation.Screen
 import com.magic.officeapp.ui.theme.Grey800
+import com.magic.officeapp.ui.viewmodel.AnnouncementViewModel
 import com.magic.officeapp.ui.viewmodel.AttendanceViewModel
 import com.magic.officeapp.ui.viewmodel.AuthViewModel
 import java.sql.Time
