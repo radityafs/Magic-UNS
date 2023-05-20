@@ -30,13 +30,7 @@ import com.magic.officeapp.ui.component.Dialog
 import com.magic.officeapp.ui.navigation.Screen
 import com.magic.officeapp.ui.screen.*
 import com.magic.officeapp.ui.screen.employee.*
-import com.magic.officeapp.ui.screen.hr.HrAnnouncementFormScreen
-import com.magic.officeapp.ui.screen.hr.HrAnnouncementScreen
-import com.magic.officeapp.ui.screen.hr.HrEmployeeListScreen
-import com.magic.officeapp.ui.screen.hr.HrHomeScreen
-import com.magic.officeapp.ui.screen.hr.HrPayrollScreen
-import com.magic.officeapp.ui.screen.hr.HrRequestDetailScreen
-import com.magic.officeapp.ui.screen.hr.HrRequestScreen
+import com.magic.officeapp.ui.screen.hr.*
 import com.magic.officeapp.ui.theme.*
 import com.magic.officeapp.ui.viewmodel.AttendanceViewModel
 import com.magic.officeapp.ui.viewmodel.AuthViewModel
@@ -103,9 +97,11 @@ class MainActivity : ComponentActivity() {
                             }
 
                             var isCheckIn = false
+                            var isCheckOut = false
                             if (todayAttendance is Result.Success) {
-                                isCheckIn =
-                                    (todayAttendance as Result.Success<AttendanceResponse>).data.data?.size!! > 0
+                                var data = (todayAttendance as Result.Success<AttendanceResponse>).data.data
+                                isCheckIn = data?.size != 0
+                                isCheckOut = data?.get(0)?.attributes?.checkOut != null
                             } else {
                                 Toast.makeText(
                                     this, "Failed to get attendance data", Toast.LENGTH_SHORT
@@ -113,13 +109,23 @@ class MainActivity : ComponentActivity() {
                                 return
                             }
 
-                            if (isCheckIn) {
+                            if(isCheckIn && isCheckOut) {
+                                Toast.makeText(
+                                    this, "You have checked in and checked out today", Toast.LENGTH_SHORT
+                                ).show()
+                                return
+                            }
+
+                            if (isCheckIn && !isCheckOut) {
                                 dialogItem.value = DialogItem(
                                     backgroundButton = Grey800,
                                     icon = R.drawable.state_leave,
                                     title = "Check Out",
                                     message = "Are you sure want to check out?",
                                     onConfirmAction = {
+                                        attendanceViewModel.checkOutAttendance(
+                                            user?.id.toString()
+                                        )
                                         showDialog.value = false
                                     },
                                     onCancelAction = {
@@ -340,8 +346,16 @@ class MainActivity : ComponentActivity() {
                                 HrRequestDetailScreen(navController = navController, id = id!!)
                             }
 
+                            composable(Screen.HrAttendanceScreen.route) {
+                                HrAttendanceListScreen(navController = navController)
+                            }
+
                             composable(Screen.HrPayrollScreen.route) {
                                 HrPayrollScreen(navController = navController)
+                            }
+
+                            composable(Screen.HrPayrollFormScreen.route) {
+                                HrPayrollFormScreen(navController = navController)
                             }
                         }
                     }

@@ -109,8 +109,6 @@ fun HrAddEmployeeScreen(
             .padding(horizontal = 24.dp)
             .fillMaxSize()
     ) {
-
-
         item {
             Row(
                 modifier = Modifier

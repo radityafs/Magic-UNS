@@ -1,6 +1,7 @@
 package com.magic.officeapp.data.api
 
 import com.magic.officeapp.data.model.request.AttendanceRequest
+import com.magic.officeapp.data.model.request.CheckoutAttendanceRequest
 import com.magic.officeapp.data.model.response.AttendanceResponse
 import com.magic.officeapp.data.model.response.LocationResponse
 import retrofit2.http.Body
@@ -16,11 +17,6 @@ interface ApiAttendanceInterface {
     @GET("/api/location")
     suspend fun getApiLocation(): LocationResponse
 
-    @GET("/api/attendances/?populate=user&sort=createdAt:desc&pagination[pageSize]=100")
-    suspend fun getAttendance(
-        @Header("Authorization") token: String = ""
-    ): AttendanceResponse
-
     @GET("/api/attendances")
     suspend fun getAttendanceByUserId(
         @Header("Authorization") token: String = "",
@@ -30,11 +26,11 @@ interface ApiAttendanceInterface {
         @Query("pagination[pageSize]") pageSize: Int = 100
     ): AttendanceResponse
 
-    @GET("/api/attendances/?populate=user&filters[user][id][\$eq]={userId}&sort=publishedAt:desc&pagination[pageSize]=100")
-    suspend fun getAttendance(
-        @Header("Authorization") token: String = "",
-        userId: String
-    ): AttendanceResponse
+    @GET("/api/attendances/?populate[user][populate]=*")
+    suspend fun getAllAttendance(
+        @Query("sort") sort: String = "updatedAt:desc",
+        @Query("pagination[pageSize]") pageSize: Int = 250
+    ) : AttendanceResponse
 
     @GET("/api/attendances")
     suspend fun getAttendanceByRange(
@@ -43,7 +39,7 @@ interface ApiAttendanceInterface {
         @Query("filters[user][id][\$eq]") userId: String,
         @Query("filters[publishedAt][\$gte]") startDate: String,
         @Query("filters[publishedAt][\$lte]") endDate: String,
-        @Query("sort") sort: String = "createdAt:desc",
+        @Query("sort") sort: String = "updatedAt:desc",
         @Query("pagination[pageSize]") pageSize: Int = 100
     ): AttendanceResponse
 
@@ -54,9 +50,8 @@ interface ApiAttendanceInterface {
     ): AttendanceResponse
 
     @PUT("/api/attendances/{id}")
-    suspend fun putAttendance(
-        @Header("Authorization") token: String = "",
-        @Path("id") id: String,
-        @Body attendanceRequest: AttendanceRequest
+    suspend fun updateCheckOut(
+        @Path("id") attendanceId: String,
+        @Body checkoutAttendanceRequest: CheckoutAttendanceRequest
     ): AttendanceResponse
 }

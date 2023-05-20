@@ -51,9 +51,9 @@ fun HrPayrollScreen(
         floatingActionButton = {
             CustomButton(
                 onClick = {
-                    navController.navigate(Screen.HrAnnouncementFormScreen.route)
+                    navController.navigate(Screen.HrPayrollFormScreen.route)
                 },
-                text = "Make an Announcement",
+                text = "Add Payroll",
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(45.dp)
@@ -130,24 +130,7 @@ fun HrPayrollScreen(
                     modifier = Modifier
                         .height(16.dp)
                 )
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(80.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Row {
-                        CustomIcon(
-                            icon = R.drawable.naik,
-                            contentDescription = "Up",
-                            size = 40
-                        )
-                    }
-                    Column {
 
-                    }
-                }
 
             }
         }

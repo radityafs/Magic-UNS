@@ -6,17 +6,21 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.Divider
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.graphics.toColorInt
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.magic.officeapp.R
+import com.magic.officeapp.ui.component.CardPayroll
 import com.magic.officeapp.ui.component.CustomButton
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -93,26 +97,28 @@ fun PayrollScreen(
 
         }
 
-//        items(4, key = { index -> index }) { index ->
-//            Column(
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//                    .padding(top = 10.dp)
-//            ) {
-//                CustomCard(
-//                    title = "Request",
-//                    onClick = {},
-//                    requestType = "Leave"
-//                )
-//
-//                Divider(
-//                    modifier = Modifier
-//                        .fillMaxWidth()
-//                        .height(1.dp),
-//                    color = Color("#F0F1F3".toColorInt())
-//                )
-//            }
-//        }
+        items(4, key = { index -> index }) { index ->
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 10.dp)
+            ) {
+                CardPayroll(
+                    salaryGross = "5500000",
+                    salaryNet = "5750000",
+                    created_at = "2021-08-01T00:00:00.000Z",
+                    salaryDate = "2021-08-01T00:00:00.000Z",
+                    onClick = {}
+                )
+
+                Divider(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(1.dp),
+                    color = Color("#F0F1F3".toColorInt())
+                )
+            }
+        }
 
         item {
             Spacer(modifier = Modifier.padding(bottom = 100.dp))

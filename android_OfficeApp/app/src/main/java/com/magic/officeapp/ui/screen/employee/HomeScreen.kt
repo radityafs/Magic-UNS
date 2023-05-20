@@ -24,6 +24,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.magic.officeapp.R
+import com.magic.officeapp.data.model.response.AttendanceResponseDataItem
+import com.magic.officeapp.ui.component.CardAttendance
 import com.magic.officeapp.ui.component.Menu
 import com.magic.officeapp.ui.navigation.Screen
 import com.magic.officeapp.ui.theme.Grey800
@@ -32,7 +34,8 @@ import com.magic.officeapp.ui.viewmodel.AuthViewModel
 import java.sql.Time
 import java.text.SimpleDateFormat
 import java.util.Date
-
+import com.magic.officeapp.utils.constants.Result
+import com.magic.officeapp.utils.stateAttendance
 
 @RequiresApi(Build.VERSION_CODES.O)
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
@@ -42,7 +45,24 @@ fun HomeScreen(
     viewModel: AuthViewModel = hiltViewModel(),
     viewModelAttendance: AttendanceViewModel = hiltViewModel(),
 ) {
-    val user = viewModel.userData.collectAsState()
+    val user = viewModel.userData.collectAsState().value
+    val attendance = viewModelAttendance.attendanceState.collectAsState().value
+    var attendanceList = emptyList<AttendanceResponseDataItem>()
+
+    if(user?.id != null) {
+        viewModelAttendance.getAttendanceUser(user.id.toString())
+    }
+
+    when (attendance) {
+        is Result.Success -> {
+            attendanceList = attendance?.data?.data as List<AttendanceResponseDataItem>
+        }
+        is Result.Error -> {
+            // Toast.makeText(navController.context, attendanceState.message, Toast.LENGTH_SHORT)
+            //     .show()
+        }
+        else -> {}
+    }
 
     val currentHour = Time(System.currentTimeMillis()).hours
     fun greeting(
@@ -78,7 +98,7 @@ fun HomeScreen(
                     ) {
                         Text(
                             text = greeting(
-                                username = user.value?.username ?: "Employee"
+                                username = user?.username ?: "Employee"
                             ), fontWeight = FontWeight.Bold, fontSize = 24.sp
                         )
                         Text(text = currentDate(), modifier = Modifier.padding(top = 10.dp))
@@ -115,7 +135,7 @@ fun HomeScreen(
                         Column(verticalArrangement = Arrangement.SpaceBetween) {
                             Text(text = "My Pay Slip", color = Color.White)
                             Text(
-                                text = "Rp 6.750.000",
+                                text = "Rp -",
                                 modifier = Modifier.padding(top = 10.dp),
                                 color = Color.White,
                                 fontWeight = FontWeight.Bold,
@@ -161,31 +181,44 @@ fun HomeScreen(
                     Text(text = "See more", fontWeight = FontWeight.Normal, fontSize = 14.sp)
                 }
             }
-
         }
-//        items(4, key = { index -> index }) { index ->
-//            Column(
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//                    .padding(top = 10.dp)
-//            ) {
-//                CustomCard(
-//                    title = "Request",
-//                    created_at = "2023-05-10T15:44:32.329Z",
-//                    onClick = {},
-//                    requestType = "Leave",
-//                )
-//
-//                Divider(
-//                    modifier = Modifier
-//                        .fillMaxWidth()
-//                        .height(1.dp),
-//                    color = Color("#F0F1F3".toColorInt())
-//                )
-//            }
-//        }
+
+        attendanceList.map { attendance ->
+            item {
+                if (attendance?.attributes?.checkOut != null) {
+                    CardAttendance(
+                        created_at = attendance.attributes.checkOut,
+                        Status = "Check Out",
+                        State = stateAttendance("Check Out", attendance.attributes.checkOut),
+                        onClick = { /*TODO*/ }
+                    )
+
+                    Divider(
+                        modifier = Modifier
+                            .height(1.dp)
+                            .fillMaxWidth(),
+                        color = Color("#F0F1F3".toColorInt())
+                    )
+                }
+
+                CardAttendance(
+                    created_at = attendance?.attributes?.createdAt!!,
+                    Status = "Check In",
+                    State = stateAttendance("Check In", attendance?.attributes?.createdAt!!),
+                    onClick = { /*TODO*/ }
+                )
+
+                Divider(
+                    modifier = Modifier
+                        .height(1.dp)
+                        .fillMaxWidth(),
+                    color = Color("#F0F1F3".toColorInt())
+                )
+            }
+        }
+
         item {
-            Spacer(modifier = Modifier.padding(bottom = 100.dp))
+            Spacer(modifier = Modifier.padding(bottom = 75.dp))
         }
     }
 

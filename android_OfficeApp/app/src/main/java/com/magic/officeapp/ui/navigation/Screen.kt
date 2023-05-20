@@ -33,4 +33,5 @@ sealed class Screen(val route: String) {
     object HrRequestDetailScreen : Screen("hr_request_detail_screen")
 
     object HrPayrollScreen : Screen("hr_payroll_screen")
+    object HrPayrollFormScreen : Screen("hr_payroll_form_screen")
 }

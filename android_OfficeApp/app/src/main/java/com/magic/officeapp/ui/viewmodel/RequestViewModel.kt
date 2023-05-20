@@ -5,10 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.magic.officeapp.data.model.request.RequestUpdate
 import com.magic.officeapp.data.model.request.RequestUpdateData
 import com.magic.officeapp.data.model.response.UserListResponseItem
-import com.magic.officeapp.data.model.response.request.AddRequestResponse
-import com.magic.officeapp.data.model.response.request.GetAllRequestsResponse
-import com.magic.officeapp.data.model.response.request.GetRequestByIdResponse
-import com.magic.officeapp.data.model.response.request.RequestsResponse
+import com.magic.officeapp.data.model.response.request.*
 import com.magic.officeapp.data.repository.RequestRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import com.magic.officeapp.utils.constants.Result
@@ -32,11 +29,13 @@ class RequestViewModel @Inject constructor(
     val addRequestState get() = _addRequestState
 
     private val _getAllRequestsResponse = MutableStateFlow<Result<GetAllRequestsResponse>>(Result.Empty)
-
     val getAllRequestsResponse get() = _getAllRequestsResponse
 
     private val _requestDetail = MutableStateFlow<Result<GetRequestByIdResponse>>(Result.Empty)
     val requestDetail get() = _requestDetail
+
+    private val _requestList = MutableStateFlow(emptyList<GetAllRequestsDataItem?>())
+    val requestList get() = _requestList
 
 
     fun updateRequestStatus(
@@ -70,10 +69,15 @@ class RequestViewModel @Inject constructor(
     ) {
         viewModelScope.launch {
             _loading.value = true
-            _getAllRequestsResponse.value = repository.getAllRequests()
+            val data = repository.getAllRequests()
+            _getAllRequestsResponse.value = data
+            if(data is Result.Success){
+                _requestList.value = data.data.data as List<GetAllRequestsDataItem?>
+            }
             _loading.value = false
         }
     }
+
     fun getUserRequest(
         userId: String,
     ) {

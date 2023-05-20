@@ -1,17 +1,18 @@
 package com.magic.officeapp.ui.viewmodel
 
+import android.annotation.SuppressLint
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.magic.officeapp.data.model.LoginResponse
 import com.magic.officeapp.data.model.response.AttendanceResponse
 import com.magic.officeapp.data.model.response.AttendanceResponseDataItem
 import com.magic.officeapp.data.model.response.LocationResponse
+import com.magic.officeapp.data.model.response.UserListResponseItem
 import com.magic.officeapp.data.repository.AttendanceRepository
-import com.magic.officeapp.data.repository.AuthRepository
 import com.magic.officeapp.utils.Attendance
 import com.magic.officeapp.utils.attendanceSummary
+import com.magic.officeapp.utils.attendanceSummaryHR
 import com.magic.officeapp.utils.constants.Result
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,10 +26,7 @@ class AttendanceViewModel @Inject constructor(
     private val repository: AttendanceRepository
 ) : ViewModel() {
 
-    private val _attendanceState = MutableStateFlow<Result<AttendanceResponse>>(Result.Empty)
-    val attendanceState get() = _attendanceState
-
-    private val _attendanceSummary = MutableStateFlow(Attendance(0,0,0,0,0,0))
+    private val _attendanceSummary = MutableStateFlow(Attendance(0,0,0,0,0,0,0))
     val attendanceSummary get() = _attendanceSummary
 
     private val _todayAttendance = MutableStateFlow<Result<AttendanceResponse>>(Result.Empty)
@@ -39,6 +37,24 @@ class AttendanceViewModel @Inject constructor(
 
     private val _location = MutableStateFlow<Result<LocationResponse>>(Result.Empty)
     val location get() = _location
+
+    private val _insertAttendance = MutableStateFlow<Result<AttendanceResponse>>(Result.Empty)
+    val insertAttendance get() = _insertAttendance
+
+    private val _attendanceState = MutableStateFlow<Result<AttendanceResponse>>(Result.Empty)
+    val attendanceState get() = _attendanceState
+
+    private val _allAttendanceState = MutableStateFlow<Result<AttendanceResponse>>(Result.Empty)
+    val allAttendanceState get() = _allAttendanceState
+
+    private val _allAttendanceData = MutableStateFlow(emptyList<AttendanceResponseDataItem>())
+    val allAttendanceData get() = _allAttendanceData
+
+    private val _allAttendanceSummary = MutableStateFlow(Attendance(0,0,0,0,0,0,0))
+    val allAttendanceSummary get() = _allAttendanceSummary
+
+    private val _checkoutAttendance = MutableStateFlow<Result<AttendanceResponse>>(Result.Empty)
+    val checkoutAttendance get() = _checkoutAttendance
 
     init {
         getLocation()
@@ -51,6 +67,33 @@ class AttendanceViewModel @Inject constructor(
             _loading.value = false
         }
     }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun getAllAttendance(listEmployee : List<UserListResponseItem> ){
+        viewModelScope.launch {
+            _loading.value = true
+            var data = repository.getAllAttendance()
+            _allAttendanceState.value = data
+
+            if (data is Result.Success) {
+                _allAttendanceData.value = data.data.data as List<AttendanceResponseDataItem>
+                val data = attendanceSummaryHR(listEmployee, data.data.data as List<AttendanceResponseDataItem>)
+                val tempSummary = Attendance(0,0,0,0,0,0,0)
+                data.forEach {
+                    tempSummary.id = 0
+                    tempSummary.present += it.present
+                    tempSummary.absent += it.absent
+                    tempSummary.late += it.late
+                    tempSummary.early += it.early
+                    tempSummary.overtime += it.overtime
+                }
+                _allAttendanceSummary.value = tempSummary
+            }
+
+            _loading.value = false
+        }
+    }
+
 
     @RequiresApi(Build.VERSION_CODES.O)
     fun getAttendanceUser(userId: String){
@@ -79,7 +122,6 @@ class AttendanceViewModel @Inject constructor(
             try {
                 val attendance = attendanceSummary(listAttendance)
                 _attendanceSummary.value = attendance
-
                 _loading.value = false
             } catch (e: Exception) {
                 _loading.value = false
@@ -88,6 +130,7 @@ class AttendanceViewModel @Inject constructor(
         }
     }
 
+    @SuppressLint("SimpleDateFormat")
     fun getAttendanceToday(userId: String) {
         val formatDate = SimpleDateFormat("yyyy-MM-dd")
         formatDate.timeZone = TimeZone.getTimeZone("UTC")
@@ -104,6 +147,22 @@ class AttendanceViewModel @Inject constructor(
             } catch (e: Exception) {
                 _loading.value = false
                 _todayAttendance.value = Result.Error(e.message.toString())
+            }
+        }
+    }
+
+    fun checkOutAttendance(id: String) {
+        viewModelScope.launch {
+            val utc = TimeZone.getTimeZone("UTC")
+            val calendar = Calendar.getInstance(utc)
+            val millis = calendar.timeInMillis
+
+            _loading.value = true
+            try {
+                _checkoutAttendance.value = repository.checkOutAttendance(id, millis.toString())
+                _loading.value = false
+            } catch (e: Exception) {
+                _loading.value = false
             }
         }
     }

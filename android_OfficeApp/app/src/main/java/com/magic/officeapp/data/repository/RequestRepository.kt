@@ -42,9 +42,7 @@ class RequestRepository @Inject constructor(
         }
     }
 
-
-    suspend fun getAllRequests(
-    ): Result<GetAllRequestsResponse> {
+    suspend fun getAllRequests(): Result<GetAllRequestsResponse> {
         return try {
             Result.Success(
                 apiService.getAllRequests()

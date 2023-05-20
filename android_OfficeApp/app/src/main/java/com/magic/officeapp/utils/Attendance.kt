@@ -1,8 +1,10 @@
 package com.magic.officeapp.utils
 
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import com.magic.officeapp.data.model.response.AttendanceResponseDataItem
+import com.magic.officeapp.data.model.response.UserListResponseItem
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -44,35 +46,43 @@ fun stateAttendance(Status: String, Datetime: String): String {
 }
 
 data class Attendance(
-    val present: Int,
-    val absent: Int,
-    val late: Int,
-    val permit : Int,
-    val early: Int,
-    val overtime: Int
+    var id : Int,
+    var present: Int,
+    var absent: Int,
+    var late: Int,
+    val permit: Int,
+    var early: Int,
+    var overtime: Int
 )
 
 @RequiresApi(Build.VERSION_CODES.O)
 fun countDatesUntilNow(startDate: String): Int {
     val utcFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
 
-    val utcStartDate = LocalDateTime.parse(startDate, utcFormatter).toLocalDate()
-    val currentDate = LocalDate.now()
+    val utcStartDate = LocalDateTime.parse(startDate, utcFormatter)
+    val wibZoneId = ZoneId.of("Asia/Jakarta")
+    val wibStartDate = utcStartDate.atOffset(ZoneOffset.UTC).atZoneSameInstant(wibZoneId).toLocalDate()
+    val currentDate = LocalDateTime.now(wibZoneId).toLocalDate()
 
-    return ChronoUnit.DAYS.between(utcStartDate, currentDate).toInt()
+    return ChronoUnit.DAYS.between(wibStartDate, currentDate).toInt()
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
 fun countHolidays(startDate: String, endDate: String): Int {
     val utcFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
 
-    val utcStartDate = LocalDateTime.parse(startDate, utcFormatter).toLocalDate()
-    val utcEndDate = LocalDateTime.parse(endDate, utcFormatter).toLocalDate()
+    val utcStartDate = LocalDateTime.parse(startDate, utcFormatter)
+    val utcEndDate = LocalDateTime.parse(endDate, utcFormatter)
+    val wibZoneId = ZoneId.of("Asia/Jakarta")
+
+    val wibStartDate = utcStartDate.atOffset(ZoneOffset.UTC).atZoneSameInstant(wibZoneId)
+    val wibEndDate = utcEndDate.atOffset(ZoneOffset.UTC).atZoneSameInstant(wibZoneId)
 
     // get list of dates between startDate and endDate
     val dates = mutableListOf<LocalDate>()
-    var date = utcStartDate
-    while (date.isBefore(utcEndDate)) {
+    var date = wibStartDate.toLocalDate()
+
+    while (date.isBefore(wibEndDate.toLocalDate())) {
         dates.add(date)
         date = date.plusDays(1)
     }
@@ -93,6 +103,18 @@ fun countHolidays(startDate: String, endDate: String): Int {
 
 @RequiresApi(Build.VERSION_CODES.O)
 fun attendanceSummary(attendanceList: List<AttendanceResponseDataItem>): Attendance {
+    if(attendanceList.isEmpty()) {
+        return Attendance(
+            id = 0,
+            present = 0,
+            absent = 0,
+            late = 0,
+            permit = 0,
+            early = 0,
+            overtime = 0
+        )
+    }
+
     val firstItem = attendanceList.first()
     val lastItem = attendanceList.last()
     val totalDays = countDatesUntilNow(lastItem?.attributes?.createdAt!!)
@@ -100,8 +122,8 @@ fun attendanceSummary(attendanceList: List<AttendanceResponseDataItem>): Attenda
     val totalWorkDays = totalDays - countHolidays(
         firstItem?.attributes?.createdAt!!,
         lastItem?.attributes?.createdAt!!
-    )
-//
+    ) + 1
+
     val totalAttendance = attendanceList.size
 
 //    var present = totalAttendance
@@ -128,6 +150,7 @@ fun attendanceSummary(attendanceList: List<AttendanceResponseDataItem>): Attenda
 //    }
 
     return Attendance(
+        id = firstItem?.attributes?.user?.data?.id!!,
         present = totalAttendance,
         absent = totalWorkDays - totalAttendance,
         late = 0,
@@ -136,4 +159,22 @@ fun attendanceSummary(attendanceList: List<AttendanceResponseDataItem>): Attenda
         overtime = 0
     )
 
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+fun attendanceSummaryHR(employeeList : List<UserListResponseItem?>, attendanceListData: List<AttendanceResponseDataItem>) : List<Attendance> {
+    val attendanceList = mutableListOf<Attendance>()
+
+    employeeList.forEach { it ->
+        val id = it?.id
+
+        val filteredAttendanceList = attendanceListData.filter {
+            it.attributes?.user?.data?.id == id
+        }
+
+        val attendance = attendanceSummary(filteredAttendanceList)
+        attendanceList.add(attendance)
+    }
+
+    return attendanceList
 }

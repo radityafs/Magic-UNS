@@ -276,7 +276,7 @@ fun HrHomeScreen(
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier.clickable {
-                            navController.navigate(Screen.AttendanceScreen.route)
+                            navController.navigate(Screen.HrAttendanceScreen.route)
                         }) {
                         CustomIcon(
                             icon = R.drawable.attendance_icon,

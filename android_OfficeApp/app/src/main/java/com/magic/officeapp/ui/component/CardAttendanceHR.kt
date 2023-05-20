@@ -10,6 +10,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
@@ -21,33 +22,33 @@ import com.magic.officeapp.utils.constants.utcToFormat
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun CardRequests(
-    title: String,
+fun CardAttendanceHR(
     created_at: String = "2021-08-12T00:00:00.000Z",
-    requestType: String = "permit",
     Status: String = "Start",
+    Name : String = "John Doe",
+    State : String = "On Time",
+    Role : String = "HR",
     onClick : () -> Unit = {}
 ) {
 
     val backgroundColor = when (Status) {
-        "waiting" -> Yellow100
-        "approved" -> Green100
+        "Check In" -> Green100
         else -> Red100
     }
 
-    val icon = when (requestType) {
-        "permit" -> R.drawable.request_icon
-        "Request Permit" -> R.drawable.request_icon
-        else -> R.drawable.icon_document
+    val icon = when (Status) {
+        "Check In" -> R.drawable.icon_leave_green
+        else -> R.drawable.attendance_icon
     }
 
-    val backgroundIcon = when(icon) {
-        R.drawable.request_icon -> Yellow100
-        else -> Green100
+    val backgroundStatus = when(State){
+        "On Time" -> Green100
+        "Late" -> Red100
+        else -> Yellow100
     }
 
-    val formattedDate = utcToFormat(created_at, "dd MMMM yyyy")
-    val formattedTime = utcToFormat(created_at, "HH:mm a")
+
+    val formattedDate = utcToFormat(created_at, "dd MMMM yyyy HH:mm a")
 
     Row(
         modifier = Modifier
@@ -58,13 +59,13 @@ fun CardRequests(
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Row(
-            modifier = Modifier.width(180.dp)
+            modifier = Modifier.width(200.dp)
         ) {
 
             CustomIcon(
                 icon = icon,
                 contentDescription = "Request",
-                backgroundColor = backgroundIcon,
+                backgroundColor = backgroundColor,
                 size = 48
             )
 
@@ -72,7 +73,7 @@ fun CardRequests(
                 modifier = Modifier.padding(start = 16.dp)
             ) {
                 Text(
-                    text = title,
+                    text = Name,
                     color = Color("#292D35".toColorInt()),
                     fontSize = 16.sp,
                     modifier = Modifier.padding(bottom = 8.dp),
@@ -88,17 +89,24 @@ fun CardRequests(
             horizontalAlignment = Alignment.End,
         ) {
             Text(
-                text = formattedTime,
+                text = Role,
                 color = Color("#292D35".toColorInt()),
                 fontSize = 12.sp,
                 modifier = Modifier.padding(bottom = 12.dp),
                 fontWeight = FontWeight.W600
             )
-            StatusBar(label = Status, color = backgroundColor)
+            StatusBar(label = State, color = backgroundStatus)
         }
 
     }
 
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+@Preview(showBackground = true)
+@Composable
+fun CardAttendanceHRPreview() {
+    CardAttendanceHR()
 }
 
 

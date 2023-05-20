@@ -1,8 +1,9 @@
 package com.magic.officeapp.data.repository
 
 import com.magic.officeapp.data.api.ApiAttendanceInterface
-import com.magic.officeapp.data.model.LoginResponse
 import com.magic.officeapp.data.model.request.AttendanceRequest
+import com.magic.officeapp.data.model.request.CheckoutAttendanceRequest
+import com.magic.officeapp.data.model.request.CheckoutAttendanceRequestData
 import com.magic.officeapp.data.model.request.DataAttendanceRequest
 import com.magic.officeapp.data.model.response.AttendanceResponse
 import com.magic.officeapp.data.model.response.LocationResponse
@@ -26,9 +27,37 @@ class AttendanceRepository @Inject constructor(
         }
     }
 
+    suspend fun checkOutAttendance(
+        attendanceId : String,
+        time : String
+    ) : Result<AttendanceResponse>{
+        return try {
+            Result.Success(
+                apiService.updateCheckOut(
+                    attendanceId = attendanceId,
+                    CheckoutAttendanceRequest(
+                        data = CheckoutAttendanceRequestData(
+                            checkOut = time
+                        )
+                    )
+                )
+            )
+        } catch (e: Exception) {
+            Result.Error(e.message.toString())
+        }
+    }
+
     suspend fun getAttendanceUser(userId: String) : Result<AttendanceResponse>{
         return try {
             Result.Success(apiService.getAttendanceByUserId(userId = userId))
+        } catch (e: Exception) {
+            Result.Error(e.message.toString())
+        }
+    }
+
+    suspend fun getAllAttendance() : Result<AttendanceResponse>{
+        return try {
+            Result.Success(apiService.getAllAttendance())
         } catch (e: Exception) {
             Result.Error(e.message.toString())
         }

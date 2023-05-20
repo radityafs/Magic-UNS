@@ -1,7 +1,7 @@
-package com.magic.officeapp.ui.screen.employee
+package com.magic.officeapp.ui.screen.hr
 
 import android.os.Build
-import android.widget.Toast
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
@@ -13,11 +13,14 @@ import androidx.compose.material.Divider
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
@@ -25,43 +28,41 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.magic.officeapp.R
-import com.magic.officeapp.data.model.response.AttendanceResponseDataItem
 import com.magic.officeapp.ui.component.CardAttendance
+import com.magic.officeapp.ui.component.CardAttendanceHR
 import com.magic.officeapp.ui.component.CustomButton
+import com.magic.officeapp.ui.component.TextInput
 import com.magic.officeapp.ui.viewmodel.AttendanceViewModel
-import com.magic.officeapp.ui.viewmodel.AuthViewModel
+import com.magic.officeapp.ui.viewmodel.EmployeeViewModel
+import com.magic.officeapp.utils.Attendance
 import com.magic.officeapp.utils.constants.Result
 import com.magic.officeapp.utils.stateAttendance
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun AttendanceScreen(
+fun HrAttendanceListScreen(
     navController: NavController = rememberNavController(),
-    authViewModel: AuthViewModel = hiltViewModel(),
-    attendanceViewModel: AttendanceViewModel = hiltViewModel()
+    attendanceViewModel: AttendanceViewModel = hiltViewModel(),
+    employeeViewModel: EmployeeViewModel = hiltViewModel()
 ) {
-    val user = authViewModel.userData.collectAsState().value
-    var attendanceList = emptyList<AttendanceResponseDataItem>()
+
+    val (search, setSearch) = remember { mutableStateOf("") }
+    val getEmployeeResponse = employeeViewModel.getEmployeeListResponse.collectAsState().value
     val attendanceSummary = attendanceViewModel.attendanceSummary.collectAsState().value
+    val employeeData = employeeViewModel.employeeData.collectAsState().value
 
     val attendanceState = attendanceViewModel.attendanceState.collectAsState().value
+    val listAllAttendance = attendanceViewModel.allAttendanceData.collectAsState().value
+    val listAllAttendanceState = attendanceViewModel.allAttendanceState.collectAsState().value
+    val listALlAttendanceSummary = attendanceViewModel.allAttendanceSummary.collectAsState().value
 
-    if (user?.jwt != null) {
-        attendanceViewModel.getAttendanceUser(user.id.toString())
+    if (getEmployeeResponse is Result.Empty) {
+        employeeViewModel.getEmployeeList("")
     }
 
-    when (attendanceState) {
-        is Result.Success -> {
-            attendanceList = attendanceState?.data?.data as List<AttendanceResponseDataItem>
-        }
-        is Result.Error -> {
-            Toast.makeText(navController.context, attendanceState.message, Toast.LENGTH_SHORT)
-                .show()
-        }
-        else -> {
-        }
+    if (employeeData.isNotEmpty() && listAllAttendance.isEmpty()) {
+        attendanceViewModel.getAllAttendance(employeeData)
     }
-
 
     LazyColumn(
         modifier = Modifier
@@ -105,7 +106,7 @@ fun AttendanceScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = attendanceSummary?.present.toString(),
+                        text = listALlAttendanceSummary.present.toString(),
                         fontSize = 32.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color("#37A345".toColorInt())
@@ -123,7 +124,7 @@ fun AttendanceScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = attendanceSummary?.permit.toString(),
+                        text = listALlAttendanceSummary.permit.toString(),
                         fontSize = 32.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color("#E5B200".toColorInt())
@@ -141,7 +142,7 @@ fun AttendanceScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = attendanceSummary?.absent.toString(),
+                        text = listALlAttendanceSummary.absent.toString(),
                         fontSize = 32.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color("#D3221E".toColorInt())
@@ -155,6 +156,7 @@ fun AttendanceScreen(
                 }
             }
         }
+
         item {
             Row(
                 modifier = Modifier
@@ -179,16 +181,43 @@ fun AttendanceScreen(
                 )
             }
 
+            Spacer(modifier = Modifier.height(30.dp))
         }
 
-        attendanceList.map { attendance ->
+        item {
+            TextInput(
+                value = search,
+                onValueChange = setSearch,
+                placeholder = "Search by name",
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+
+        listAllAttendance.map { attendance ->
             item {
                 if (attendance?.attributes?.checkOut != null) {
-                    CardAttendance(
-                        created_at = attendance.attributes.checkOut,
+                    CardAttendanceHR(
+                        created_at = attendance.attributes?.checkOut,
                         Status = "Check Out",
-                        State = stateAttendance("Check Out", attendance.attributes.checkOut),
-                        onClick = { /*TODO*/ }
+                        Name = attendance.attributes.user?.data?.attributes?.username ?: "",
+                        Role = attendance.attributes.user?.data?.attributes?.jobRole?.data?.attributes?.name ?: "",
+                        State = stateAttendance("Check Out", attendance.attributes.checkOut)
+                    )
+
+                    Divider(
+                        modifier = Modifier
+                            .height(1.dp)
+                            .fillMaxWidth(),
+                        color = Color("#F0F1F3".toColorInt())
+                    )
+                } else {
+                    CardAttendanceHR(
+                        created_at = attendance?.attributes?.createdAt!!,
+                        Name = attendance.attributes.user?.data?.attributes?.username ?: "",
+                        Role = attendance.attributes.user?.data?.attributes?.jobRole?.data?.attributes?.name ?: "",
+                        Status = "Check In",
+                        State = stateAttendance("Check In", attendance?.attributes?.createdAt!!)
                     )
 
                     Divider(
@@ -198,27 +227,8 @@ fun AttendanceScreen(
                         color = Color("#F0F1F3".toColorInt())
                     )
                 }
-
-                CardAttendance(
-                    created_at = attendance?.attributes?.createdAt!!,
-                    Status = "Check In",
-                    State = stateAttendance("Check In", attendance?.attributes?.createdAt!!),
-                    onClick = { /*TODO*/ }
-                )
-
-                Divider(
-                    modifier = Modifier
-                        .height(1.dp)
-                        .fillMaxWidth(),
-                    color = Color("#F0F1F3".toColorInt())
-                )
             }
-        }
-
-        item {
-            Spacer(modifier = Modifier.padding(bottom = 100.dp))
         }
     }
 }
-
 
