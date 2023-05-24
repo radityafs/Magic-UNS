@@ -12,6 +12,16 @@ import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 
+data class Attendance(
+    var id: Int,
+    var present: Int,
+    var absent: Int,
+    var late: Int,
+    val permit: Int,
+    var early: Int,
+    var overtime: Int
+)
+
 @RequiresApi(Build.VERSION_CODES.O)
 fun stateAttendance(Status: String, Datetime: String): String {
     val utcFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
@@ -45,31 +55,42 @@ fun stateAttendance(Status: String, Datetime: String): String {
     }
 }
 
-data class Attendance(
-    var id : Int,
-    var present: Int,
-    var absent: Int,
-    var late: Int,
-    val permit: Int,
-    var early: Int,
-    var overtime: Int
-)
-
 @RequiresApi(Build.VERSION_CODES.O)
 fun countDatesUntilNow(startDate: String): Int {
     val utcFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
 
     val utcStartDate = LocalDateTime.parse(startDate, utcFormatter)
     val wibZoneId = ZoneId.of("Asia/Jakarta")
-    val wibStartDate = utcStartDate.atOffset(ZoneOffset.UTC).atZoneSameInstant(wibZoneId).toLocalDate()
+    val wibStartDate =
+        utcStartDate.atOffset(ZoneOffset.UTC).atZoneSameInstant(wibZoneId).toLocalDate()
     val currentDate = LocalDateTime.now(wibZoneId).toLocalDate()
 
     return ChronoUnit.DAYS.between(wibStartDate, currentDate).toInt()
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
-fun countHolidays(startDate: String, endDate: String): Int {
+fun countDatesRange(startDate: String, endDate: String): Int {
     val utcFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+
+    val utcStartDate = LocalDateTime.parse(startDate, utcFormatter)
+    val utcEndDate = LocalDateTime.parse(endDate, utcFormatter)
+    val wibZoneId = ZoneId.of("Asia/Jakarta")
+
+    val wibStartDate = utcStartDate.atOffset(ZoneOffset.UTC).atZoneSameInstant(wibZoneId)
+    val wibEndDate = utcEndDate.atOffset(ZoneOffset.UTC).atZoneSameInstant(wibZoneId)
+
+    return ChronoUnit.DAYS.between(wibStartDate, wibEndDate).toInt()
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+fun countHolidays(startDate: String, endDate: String?): Int {
+    val utcFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+
+    var endDate = endDate
+
+    if (endDate == null) {
+        endDate = LocalDateTime.now().format(utcFormatter)
+    }
 
     val utcStartDate = LocalDateTime.parse(startDate, utcFormatter)
     val utcEndDate = LocalDateTime.parse(endDate, utcFormatter)
@@ -82,10 +103,13 @@ fun countHolidays(startDate: String, endDate: String): Int {
     val dates = mutableListOf<LocalDate>()
     var date = wibStartDate.toLocalDate()
 
+    // add last date to list
     while (date.isBefore(wibEndDate.toLocalDate())) {
         dates.add(date)
         date = date.plusDays(1)
     }
+
+    dates.add(wibEndDate.toLocalDate())
 
     // count holidays
     var holidays = 0
@@ -94,16 +118,31 @@ fun countHolidays(startDate: String, endDate: String): Int {
         val dateString = it.format(dateFormat)
 
         if (it.dayOfWeek.value == 6 || it.dayOfWeek.value == 7 || isHoliday(dateString)) {
+            Log.d("Attendance", "dateString: $dateString isHoliday")
+
             holidays++
+        } else {
+            Log.d("Attendance", "dateString: $dateString isWorkDay")
         }
     }
 
     return holidays
 }
 
+
+fun countSalary(salary: Long, attendance: Attendance): Long {
+    val salaryPerDay = salary / (attendance.absent + attendance.present)
+    return salaryPerDay * attendance.present
+}
+
+fun countTax(salary: Long, tax: String): Long {
+    val tax = tax.toDouble() / 100
+    return (salary * tax).toLong()
+}
+
 @RequiresApi(Build.VERSION_CODES.O)
 fun attendanceSummary(attendanceList: List<AttendanceResponseDataItem>): Attendance {
-    if(attendanceList.isEmpty()) {
+    if (attendanceList.isEmpty()) {
         return Attendance(
             id = 0,
             present = 0,
@@ -117,52 +156,69 @@ fun attendanceSummary(attendanceList: List<AttendanceResponseDataItem>): Attenda
 
     val firstItem = attendanceList.first()
     val lastItem = attendanceList.last()
-    val totalDays = countDatesUntilNow(lastItem?.attributes?.createdAt!!)
+    val totalDays = countDatesUntilNow(lastItem?.attributes?.createdAt!!) + 1
 
     val totalWorkDays = totalDays - countHolidays(
-        firstItem?.attributes?.createdAt!!,
-        lastItem?.attributes?.createdAt!!
-    ) + 1
+        lastItem?.attributes?.createdAt!!, null
+    )
 
     val totalAttendance = attendanceList.size
-
-//    var present = totalAttendance
-//    var absent = totalWorkDays - totalAttendance
-//    var late = 0
-//    var early = 0
-//    var overtime = 0
-//
-//    attendanceList.forEach {
-//        val checkIn = it.attributes?.publishedAt
-//        val checkOut = it.attributes?.checkOut
-//
-//        val checkInState = stateAttendance("Check In", checkIn!!)
-//        val checkOutState = stateAttendance("Check Out", checkOut!!)
-//
-//        if (checkInState == "Early" && checkOutState == "On Time") {
-//            early++
-//        } else if (checkInState == "On Time" && checkOutState == "Overtime") {
-//            overtime++
-//        } else {
-//            late++
-//        }
-//
-//    }
 
     return Attendance(
         id = firstItem?.attributes?.user?.data?.id!!,
         present = totalAttendance,
-        absent = totalWorkDays - totalAttendance,
+        absent = (totalWorkDays - totalAttendance).coerceAtLeast(0),
         late = 0,
         permit = 0,
         early = 0,
         overtime = 0
     )
-
 }
 
+
 @RequiresApi(Build.VERSION_CODES.O)
-fun attendanceSummaryHR(employeeList : List<UserListResponseItem?>, attendanceListData: List<AttendanceResponseDataItem>) : List<Attendance> {
+fun attendanceSummarybyMonth(
+    startDate: String,
+    endDate: String,
+    attendanceList: List<AttendanceResponseDataItem>
+): Attendance {
+    if (attendanceList.isEmpty()) {
+        return Attendance(
+            id = 0,
+            present = 0,
+            absent = 0,
+            late = 0,
+            permit = 0,
+            early = 0,
+            overtime = 0
+        )
+    }
+
+    val totalDays = countDatesRange(startDate, endDate) + 1
+
+    val totalWorkDays = totalDays - countHolidays(
+        startDate, endDate
+    )
+
+    val totalAttendance = attendanceList.size
+
+    return Attendance(
+        id = attendanceList.first().attributes?.user?.data?.id!!,
+        present = totalAttendance,
+        absent = (totalWorkDays - totalAttendance).coerceAtLeast(0),
+        late = 0,
+        permit = 0,
+        early = 0,
+        overtime = 0
+    )
+}
+
+
+@RequiresApi(Build.VERSION_CODES.O)
+fun attendanceSummaryHR(
+    employeeList: List<UserListResponseItem?>,
+    attendanceListData: List<AttendanceResponseDataItem>
+): List<Attendance> {
     val attendanceList = mutableListOf<Attendance>()
 
     employeeList.forEach { it ->

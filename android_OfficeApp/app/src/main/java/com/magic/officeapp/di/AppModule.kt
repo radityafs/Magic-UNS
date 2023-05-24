@@ -50,4 +50,10 @@ object AppModule {
         return retrofit.create(ApiRequestInterface::class.java)
     }
 
+    @Provides
+    @Singleton
+    fun apiPayroll(retrofit: Retrofit): ApiPayrollInterface {
+        return retrofit.create(ApiPayrollInterface::class.java)
+    }
+
 }

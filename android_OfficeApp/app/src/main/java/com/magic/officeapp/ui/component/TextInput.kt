@@ -45,7 +45,7 @@ fun TextInput(
 
     val isEmailValid = value.matches(Regex("[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+"))
     val isNumberValid = value.matches(Regex("[0-9]+"))
-    val isPasswordValid = value.length > 8
+    val isPasswordValid = value.length >= 8
     val isTextValid = value.length >= 3
     val isValidState = remember { mutableStateOf(true) }
 
@@ -132,6 +132,7 @@ fun TextInput(
                     )
                 }
             },
+            maxLines = 1,
         )
     }
 

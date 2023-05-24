@@ -3,6 +3,7 @@ package com.magic.officeapp.ui.screen.employee
 import android.annotation.SuppressLint
 import android.os.Build
 import android.util.Log
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
@@ -26,18 +27,22 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.magic.officeapp.R
 import com.magic.officeapp.data.model.response.AttendanceResponseDataItem
+import com.magic.officeapp.data.model.response.PayrollResponseDataItem
 import com.magic.officeapp.data.model.response.announcement.DataItem
 import com.magic.officeapp.ui.component.CardAttendance
 import com.magic.officeapp.ui.component.Menu
+import com.magic.officeapp.ui.component.numberToCurrency
 import com.magic.officeapp.ui.navigation.Screen
 import com.magic.officeapp.ui.theme.Grey800
 import com.magic.officeapp.ui.viewmodel.AnnouncementViewModel
 import com.magic.officeapp.ui.viewmodel.AttendanceViewModel
 import com.magic.officeapp.ui.viewmodel.AuthViewModel
+import com.magic.officeapp.ui.viewmodel.PayrollViewModel
 import java.sql.Time
 import java.text.SimpleDateFormat
 import java.util.Date
 import com.magic.officeapp.utils.constants.Result
+import com.magic.officeapp.utils.constants.utcToFormat
 import com.magic.officeapp.utils.stateAttendance
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -47,13 +52,33 @@ fun HomeScreen(
     navController: NavController = rememberNavController(),
     viewModel: AuthViewModel = hiltViewModel(),
     viewModelAttendance: AttendanceViewModel = hiltViewModel(),
+    payrollViewModel: PayrollViewModel = hiltViewModel()
 ) {
     val user = viewModel.userData.collectAsState().value
     val attendance = viewModelAttendance.attendanceState.collectAsState().value
     var attendanceList = emptyList<AttendanceResponseDataItem>()
 
-    if(user?.id != null) {
+    if (user?.id != null) {
         viewModelAttendance.getAttendanceUser(user.id.toString())
+        payrollViewModel.getAllPayrollbyUser(user.id.toString())
+    }
+
+    val payrollState = payrollViewModel.allPayrollByUserState.collectAsState().value
+    val payrollByUser = payrollViewModel.allPayrollByUser.collectAsState().value
+
+    when (payrollState) {
+        is Result.Empty -> {
+            if (user?.id != null) {
+                payrollViewModel.getAllPayrollbyUser(user.id.toString())
+            }
+        }
+        is Result.Error -> {
+            Toast.makeText(navController.context, "Error", Toast.LENGTH_SHORT).show()
+        }
+        is Result.Success -> {
+            Log.d("TAG", "PayrollScreen: ${payrollState.data}")
+        }
+        else -> {}
     }
 
     when (attendance) {
@@ -81,6 +106,14 @@ fun HomeScreen(
     }
 
     fun currentDate() = SimpleDateFormat("dd MMMM yyyy").format(Date())
+
+    fun latestPayroll(): PayrollResponseDataItem? {
+        var latestPayroll: PayrollResponseDataItem? = null
+        if (payrollByUser != null) {
+            latestPayroll = payrollByUser[0]
+        }
+        return latestPayroll
+    }
 
     LazyColumn(
         modifier = Modifier
@@ -136,12 +169,29 @@ fun HomeScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Column(verticalArrangement = Arrangement.SpaceBetween) {
-                            Text(text = "My Pay Slip", color = Color.White)
+                            Row {
+                                Text(
+                                    text = "My Pay Slip : ",
+                                    color = Color.White,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+
+                                Text(
+                                    text = if (latestPayroll() != null) utcToFormat(
+                                        latestPayroll()?.attributes?.month,
+                                        "MMMM yyyy"
+                                    ) else "-",
+                                    color = Color.White
+                                )
+                            }
+
                             Text(
-                                text = "Rp -",
+                                text = if (latestPayroll() != null) numberToCurrency(
+                                    latestPayroll()?.attributes?.totalSalary ?: "0"
+                                ) else "-",
                                 modifier = Modifier.padding(top = 10.dp),
                                 color = Color.White,
-                                fontWeight = FontWeight.Bold,
+                                fontWeight = FontWeight.SemiBold,
                                 fontSize = 24.sp
                             )
                         }
@@ -186,13 +236,29 @@ fun HomeScreen(
             }
         }
 
-        attendanceList.map { attendance ->
-            item {
-                if (attendance?.attributes?.checkOut != null) {
+        attendanceList.mapIndexed { idx, attendance ->
+            if (idx < 2) {
+                item {
+                    if (attendance?.attributes?.checkOut != null) {
+                        CardAttendance(
+                            created_at = attendance.attributes.checkOut,
+                            Status = "Check Out",
+                            State = stateAttendance("Check Out", attendance.attributes.checkOut),
+                            onClick = { /*TODO*/ }
+                        )
+
+                        Divider(
+                            modifier = Modifier
+                                .height(1.dp)
+                                .fillMaxWidth(),
+                            color = Color("#F0F1F3".toColorInt())
+                        )
+                    }
+
                     CardAttendance(
-                        created_at = attendance.attributes.checkOut,
-                        Status = "Check Out",
-                        State = stateAttendance("Check Out", attendance.attributes.checkOut),
+                        created_at = attendance?.attributes?.createdAt!!,
+                        Status = "Check In",
+                        State = stateAttendance("Check In", attendance?.attributes?.createdAt!!),
                         onClick = { /*TODO*/ }
                     )
 
@@ -203,20 +269,6 @@ fun HomeScreen(
                         color = Color("#F0F1F3".toColorInt())
                     )
                 }
-
-                CardAttendance(
-                    created_at = attendance?.attributes?.createdAt!!,
-                    Status = "Check In",
-                    State = stateAttendance("Check In", attendance?.attributes?.createdAt!!),
-                    onClick = { /*TODO*/ }
-                )
-
-                Divider(
-                    modifier = Modifier
-                        .height(1.dp)
-                        .fillMaxWidth(),
-                    color = Color("#F0F1F3".toColorInt())
-                )
             }
         }
 

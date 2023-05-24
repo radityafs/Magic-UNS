@@ -60,4 +60,12 @@ object RepositoryModule {
     ): RequestRepository {
         return RequestRepository(apiRequest)
     }
+
+    @Provides
+    @Singleton
+    fun providePayrollRepository(
+        apiPayrollInterface: ApiPayrollInterface
+    ): PayrollRepository {
+        return PayrollRepository(apiPayrollInterface)
+    }
 }

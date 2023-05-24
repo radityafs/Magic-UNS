@@ -34,6 +34,7 @@ import com.magic.officeapp.ui.screen.hr.*
 import com.magic.officeapp.ui.theme.*
 import com.magic.officeapp.ui.viewmodel.AttendanceViewModel
 import com.magic.officeapp.ui.viewmodel.AuthViewModel
+import com.magic.officeapp.ui.viewmodel.PayrollViewModel
 import com.magic.officeapp.utils.constants.DialogItem
 import com.magic.officeapp.utils.constants.Result
 import com.magic.officeapp.utils.hasLocationPermission
@@ -64,6 +65,7 @@ class MainActivity : ComponentActivity() {
                     val officeLocation by attendanceViewModel.location.collectAsState()
                     val loadingAuthentication by authViewModel.loading.collectAsState()
                     val loadingAttendance by attendanceViewModel.loading.collectAsState()
+
                     val showDialog = remember { mutableStateOf(false) }
                     val dialogItem = remember { mutableStateOf(DialogItem()) }
 
@@ -98,10 +100,20 @@ class MainActivity : ComponentActivity() {
 
                             var isCheckIn = false
                             var isCheckOut = false
+                            var attendanceId = ""
+
                             if (todayAttendance is Result.Success) {
-                                var data = (todayAttendance as Result.Success<AttendanceResponse>).data.data
+                                var data =
+                                    (todayAttendance as Result.Success<AttendanceResponse>).data.data
                                 isCheckIn = data?.size != 0
-                                isCheckOut = data?.get(0)?.attributes?.checkOut != null
+
+                                if (data?.size != 0) {
+                                    isCheckOut = data?.get(0)?.attributes?.checkOut != null
+                                    attendanceId = data?.get(0)?.id.toString()
+                                } else {
+                                    false
+                                }
+
                             } else {
                                 Toast.makeText(
                                     this, "Failed to get attendance data", Toast.LENGTH_SHORT
@@ -109,9 +121,11 @@ class MainActivity : ComponentActivity() {
                                 return
                             }
 
-                            if(isCheckIn && isCheckOut) {
+                            if (isCheckIn && isCheckOut) {
                                 Toast.makeText(
-                                    this, "You have checked in and checked out today", Toast.LENGTH_SHORT
+                                    this,
+                                    "You have checked in and checked out today",
+                                    Toast.LENGTH_SHORT
                                 ).show()
                                 return
                             }
@@ -124,7 +138,7 @@ class MainActivity : ComponentActivity() {
                                     message = "Are you sure want to check out?",
                                     onConfirmAction = {
                                         attendanceViewModel.checkOutAttendance(
-                                            user?.id.toString()
+                                            attendanceId
                                         )
                                         showDialog.value = false
                                     },
@@ -227,7 +241,6 @@ class MainActivity : ComponentActivity() {
                             }
                         },
                         floatingActionButton = {
-                            if (user?.role?.name != "HR") {
                                 if (currentRoute == Screen.HomeScreen.route || currentRoute == Screen.AnnouncementScreen.route) {
                                     FloatingActionButton(
                                         onClick = {
@@ -243,7 +256,6 @@ class MainActivity : ComponentActivity() {
                                             modifier = Modifier.size(48.dp)
                                         )
                                     }
-                                }
                             }
                         },
                         floatingActionButtonPosition = FabPosition.Center,
@@ -299,10 +311,6 @@ class MainActivity : ComponentActivity() {
                                 PayrollScreen(navController = navController)
                             }
 
-                            composable(Screen.PayrollDetailScreen.route) {
-                                PayrollDetailScreen(navController = navController)
-                            }
-
                             composable(Screen.AnnouncementScreen.route) {
                                 AnnouncementScreen(navController = navController)
                             }
@@ -311,9 +319,9 @@ class MainActivity : ComponentActivity() {
                                 ProfileScreen(navController = navController)
                             }
 
-                            composable(Screen.RequestDetailScreen.route+"/{id}") {
+                            composable(Screen.RequestDetailScreen.route + "/{id}") {
                                 val id = it.arguments?.getString("id")?.toInt()
-                                RequestDetailScreen(navController = navController,id=id!!)
+                                RequestDetailScreen(navController = navController, id = id!!)
                             }
 
                             // HR
@@ -341,7 +349,7 @@ class MainActivity : ComponentActivity() {
                                 HrRequestScreen(navController = navController)
                             }
 
-                            composable(Screen.HrRequestDetailScreen.route + "/{id}") {backStackEntry ->
+                            composable(Screen.HrRequestDetailScreen.route + "/{id}") { backStackEntry ->
                                 val id = backStackEntry.arguments?.getString("id")?.toInt()
                                 HrRequestDetailScreen(navController = navController, id = id!!)
                             }
@@ -356,6 +364,11 @@ class MainActivity : ComponentActivity() {
 
                             composable(Screen.HrPayrollFormScreen.route) {
                                 HrPayrollFormScreen(navController = navController)
+                            }
+
+                            composable(Screen.PayrollDetailScreen.route + "/{id}") {
+                                val id = it.arguments?.getString("id")?.toInt()
+                                PayrollDetailScreen(navController = navController, id = id!!)
                             }
                         }
                     }

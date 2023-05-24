@@ -13,7 +13,7 @@ import javax.inject.Inject
 class AttendanceRepository @Inject constructor(
     private val apiService: ApiAttendanceInterface
 ) {
-    suspend fun getAttendanceToday(
+    suspend fun getAttendanceUserByRange(
         userId: String, startDate: String, endDate: String
     ): Result<AttendanceResponse> {
         return try {

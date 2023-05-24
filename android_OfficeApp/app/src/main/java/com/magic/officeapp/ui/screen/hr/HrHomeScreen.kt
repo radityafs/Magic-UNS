@@ -73,7 +73,7 @@ fun HrHomeScreen(
     val requests = requestViewModel.getAllRequestsResponse.collectAsState().value
     val currentHour = Time(System.currentTimeMillis()).hours
 
-    var data :  List<GetAllRequestsDataItem> = emptyList()
+    var data: List<GetAllRequestsDataItem> = emptyList()
 
     when (requests) {
         is Result.Success -> {
@@ -365,33 +365,33 @@ fun HrHomeScreen(
                 }
             }
         }
-        item {
-
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Row(
+        if (listAnnouncement.isNotEmpty()) {
+            item {
+                Column(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = "Announcement", fontWeight = FontWeight.SemiBold, fontSize = 14.sp
-                    )
-                    Text(text = "See more",
-                        fontWeight = FontWeight.Normal,
-                        fontSize = 14.sp,
-                        color = Color("#858D9D".toColorInt()),
-                        modifier = Modifier.clickable {
-                            navController.navigate(Screen.HrAnnouncementScreen.route)
-                        })
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Announcement",
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 14.sp
+                        )
+                        Text(text = "See more",
+                            fontWeight = FontWeight.Normal,
+                            fontSize = 14.sp,
+                            color = Color("#858D9D".toColorInt()),
+                            modifier = Modifier.clickable {
+                                navController.navigate(Screen.HrAnnouncementScreen.route)
+                            })
+                    }
                 }
             }
-        }
 
-        if(listAnnouncement.size != 0) {
             val announcement = listAnnouncement.get(0)
-
             item {
                 Card(
                     modifier = Modifier
@@ -436,16 +436,6 @@ fun HrHomeScreen(
                     }
                 }
             }
-        } else {
-            item {
-                Text(
-                    "No Announcement",
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 14.sp,
-                    color = Color("#292D35".toColorInt()),
-                    modifier = Modifier.padding(top = 12.dp, bottom = 12.dp)
-                )
-            }
         }
 
         item {
@@ -477,42 +467,46 @@ fun HrHomeScreen(
             )
         }
 
+        listAllAttendance.mapIndexed { idx, attendance ->
+            if (idx < 3) {
+                item {
+                    if (attendance?.attributes?.checkOut != null) {
+                        CardAttendanceHR(
+                            created_at = attendance.attributes?.checkOut,
+                            Status = "Check Out",
+                            Name = attendance.attributes.user?.data?.attributes?.username ?: "",
+                            Role = attendance.attributes.user?.data?.attributes?.jobRole?.data?.attributes?.name
+                                ?: "",
+                            State = stateAttendance("Check Out", attendance.attributes.checkOut)
+                        )
 
-        listAllAttendance.map { attendance ->
-            item {
-                if (attendance?.attributes?.checkOut != null) {
-                    CardAttendanceHR(
-                        created_at = attendance.attributes?.checkOut,
-                        Status = "Check Out",
-                        Name = attendance.attributes.user?.data?.attributes?.username ?: "",
-                        Role = attendance.attributes.user?.data?.attributes?.jobRole?.data?.attributes?.name ?: "",
-                        State = stateAttendance("Check Out", attendance.attributes.checkOut)
-                    )
+                        Divider(
+                            modifier = Modifier
+                                .height(1.dp)
+                                .fillMaxWidth(),
+                            color = Color("#F0F1F3".toColorInt())
+                        )
+                    } else {
+                        CardAttendanceHR(
+                            created_at = attendance?.attributes?.createdAt!!,
+                            Name = attendance.attributes.user?.data?.attributes?.username ?: "",
+                            Role = attendance.attributes.user?.data?.attributes?.jobRole?.data?.attributes?.name
+                                ?: "",
+                            Status = "Check In",
+                            State = stateAttendance("Check In", attendance?.attributes?.createdAt!!)
+                        )
 
-                    Divider(
-                        modifier = Modifier
-                            .height(1.dp)
-                            .fillMaxWidth(),
-                        color = Color("#F0F1F3".toColorInt())
-                    )
-                } else {
-                    CardAttendanceHR(
-                        created_at = attendance?.attributes?.createdAt!!,
-                        Name = attendance.attributes.user?.data?.attributes?.username ?: "",
-                        Role = attendance.attributes.user?.data?.attributes?.jobRole?.data?.attributes?.name ?: "",
-                        Status = "Check In",
-                        State = stateAttendance("Check In", attendance?.attributes?.createdAt!!)
-                    )
-
-                    Divider(
-                        modifier = Modifier
-                            .height(1.dp)
-                            .fillMaxWidth(),
-                        color = Color("#F0F1F3".toColorInt())
-                    )
+                        Divider(
+                            modifier = Modifier
+                                .height(1.dp)
+                                .fillMaxWidth(),
+                            color = Color("#F0F1F3".toColorInt())
+                        )
+                    }
                 }
             }
         }
+
         item {
             Spacer(modifier = Modifier.padding(bottom = 100.dp))
         }

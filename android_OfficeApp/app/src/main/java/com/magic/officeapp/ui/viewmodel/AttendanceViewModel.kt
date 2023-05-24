@@ -26,7 +26,7 @@ class AttendanceViewModel @Inject constructor(
     private val repository: AttendanceRepository
 ) : ViewModel() {
 
-    private val _attendanceSummary = MutableStateFlow(Attendance(0,0,0,0,0,0,0))
+    private val _attendanceSummary = MutableStateFlow(Attendance(0, 0, 0, 0, 0, 0, 0))
     val attendanceSummary get() = _attendanceSummary
 
     private val _todayAttendance = MutableStateFlow<Result<AttendanceResponse>>(Result.Empty)
@@ -50,11 +50,14 @@ class AttendanceViewModel @Inject constructor(
     private val _allAttendanceData = MutableStateFlow(emptyList<AttendanceResponseDataItem>())
     val allAttendanceData get() = _allAttendanceData
 
-    private val _allAttendanceSummary = MutableStateFlow(Attendance(0,0,0,0,0,0,0))
+    private val _allAttendanceSummary = MutableStateFlow(Attendance(0, 0, 0, 0, 0, 0, 0))
     val allAttendanceSummary get() = _allAttendanceSummary
 
     private val _checkoutAttendance = MutableStateFlow<Result<AttendanceResponse>>(Result.Empty)
     val checkoutAttendance get() = _checkoutAttendance
+
+    private val _attendanceUserByDate = MutableStateFlow<Result<AttendanceResponse>>(Result.Empty)
+    val attendanceUserByDate get() = _attendanceUserByDate
 
     init {
         getLocation()
@@ -69,7 +72,7 @@ class AttendanceViewModel @Inject constructor(
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    fun getAllAttendance(listEmployee : List<UserListResponseItem> ){
+    fun getAllAttendance(listEmployee: List<UserListResponseItem>) {
         viewModelScope.launch {
             _loading.value = true
             var data = repository.getAllAttendance()
@@ -77,8 +80,11 @@ class AttendanceViewModel @Inject constructor(
 
             if (data is Result.Success) {
                 _allAttendanceData.value = data.data.data as List<AttendanceResponseDataItem>
-                val data = attendanceSummaryHR(listEmployee, data.data.data as List<AttendanceResponseDataItem>)
-                val tempSummary = Attendance(0,0,0,0,0,0,0)
+                val data = attendanceSummaryHR(
+                    listEmployee,
+                    data.data.data as List<AttendanceResponseDataItem>
+                )
+                val tempSummary = Attendance(0, 0, 0, 0, 0, 0, 0)
                 data.forEach {
                     tempSummary.id = 0
                     tempSummary.present += it.present
@@ -96,14 +102,14 @@ class AttendanceViewModel @Inject constructor(
 
 
     @RequiresApi(Build.VERSION_CODES.O)
-    fun getAttendanceUser(userId: String){
+    fun getAttendanceUser(userId: String) {
         viewModelScope.launch {
             _loading.value = true
             try {
                 val attendance = repository.getAttendanceUser(userId)
                 _attendanceState.value = attendance
 
-                if(attendance is Result.Success){
+                if (attendance is Result.Success) {
                     getSummaryAttendance(attendance.data.data as List<AttendanceResponseDataItem>)
                 }
 
@@ -116,7 +122,7 @@ class AttendanceViewModel @Inject constructor(
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    fun getSummaryAttendance(listAttendance : List<AttendanceResponseDataItem>){
+    fun getSummaryAttendance(listAttendance: List<AttendanceResponseDataItem>) {
         viewModelScope.launch {
             _loading.value = true
             try {
@@ -126,6 +132,20 @@ class AttendanceViewModel @Inject constructor(
             } catch (e: Exception) {
                 _loading.value = false
                 _attendanceState.value = Result.Error(e.message.toString())
+            }
+        }
+    }
+
+    fun getAttendanceUserByDate(userId: String, startDate: String, endDate: String) {
+        viewModelScope.launch {
+            _loading.value = true
+            try {
+                val attendance = repository.getAttendanceUserByRange(userId, startDate, endDate)
+                _attendanceUserByDate.value = attendance
+                _loading.value = false
+            } catch (e: Exception) {
+                _loading.value = false
+                _attendanceUserByDate.value = Result.Error(e.message.toString())
             }
         }
     }
@@ -141,7 +161,7 @@ class AttendanceViewModel @Inject constructor(
         viewModelScope.launch {
             _loading.value = true
             try {
-                val attendance = repository.getAttendanceToday(userId, currentDate, nextDate)
+                val attendance = repository.getAttendanceUserByRange(userId, currentDate, nextDate)
                 _todayAttendance.value = attendance
                 _loading.value = false
             } catch (e: Exception) {

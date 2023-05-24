@@ -2,6 +2,8 @@ package com.magic.officeapp.ui.screen.hr
 
 import Dropdown
 import android.os.Build
+import android.util.Log
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -23,24 +25,44 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.magic.officeapp.R
+import com.magic.officeapp.data.model.request.PayrollRequest
+import com.magic.officeapp.data.model.request.PayrollRequestData
+import com.magic.officeapp.data.model.response.AttendanceResponse
+import com.magic.officeapp.data.model.response.AttendanceResponseDataItem
 import com.magic.officeapp.ui.component.CustomButton
 import com.magic.officeapp.ui.component.TextInput
+import com.magic.officeapp.ui.navigation.Screen
 import com.magic.officeapp.ui.theme.Grey400
+import com.magic.officeapp.ui.viewmodel.AttendanceViewModel
 import com.magic.officeapp.ui.viewmodel.EmployeeViewModel
+import com.magic.officeapp.ui.viewmodel.PayrollViewModel
+import com.magic.officeapp.utils.*
 import com.magic.officeapp.utils.constants.Result
-import com.magic.officeapp.utils.salaryMonth
+import com.magic.officeapp.utils.constants.utcToFormat
 import itemDropdown
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun HrPayrollFormScreen(
     navController: NavController = rememberNavController(),
-    employeeViewModel: EmployeeViewModel = hiltViewModel()
+    employeeViewModel: EmployeeViewModel = hiltViewModel(),
+    attendanceViewModel: AttendanceViewModel = hiltViewModel(),
+    payrollViewModel: PayrollViewModel = hiltViewModel()
 ) {
 
-    val (employeSelected, setEmployeSelected) = remember {
+    val loading = remember {
+        mutableStateOf(false)
+    }
+
+    val attendanceUserByDate = attendanceViewModel.attendanceUserByDate.collectAsState().value
+    val insertPayrollResponse = payrollViewModel.insertPayrollDataResponse.collectAsState().value
+    val employees = employeeViewModel.employeeData.collectAsState().value
+    val employeeResponse = employeeViewModel.getEmployeeListResponse.collectAsState().value
+
+    val (employeeSelected, setEmployeeSelected) = remember {
         mutableStateOf(itemDropdown(0, ""))
     }
+
     val (monthSelected, setMonthSelected) = remember {
         mutableStateOf(itemDropdown(0, ""))
     }
@@ -60,9 +82,90 @@ fun HrPayrollFormScreen(
         mutableStateOf(emptyList<itemDropdown>())
     }
 
+    when (insertPayrollResponse) {
+        is Result.Success -> {
+            Toast.makeText(
+                navController.context,
+                "Berhasil menambahkan payroll",
+                Toast.LENGTH_SHORT
+            )
+                .show()
+
+            if (navController.currentDestination?.route == Screen.HrPayrollFormScreen.route) {
+                navController.popBackStack()
+            }
+        }
+        is Result.Error -> {
+            Toast.makeText(
+                navController.context,
+                "Gagal menambahkan payroll",
+                Toast.LENGTH_SHORT
+            )
+                .show()
+        }
+        else -> {
+        }
+    }
+
+
+    when (attendanceUserByDate) {
+        is Result.Success -> {
+            val data = attendanceUserByDate.data.data as List<AttendanceResponseDataItem>
+            val monthSummary = monthStartEnd(monthSelected.value)
+            val attendanceEmployeeSummary =
+                attendanceSummarybyMonth(
+                    dateToUTC(monthSummary.start), dateToUTC(monthSummary.end),
+                    data
+                )
+
+            val employeeSalary = employees.find { it.id == employeeSelected.id }?.salary
+
+            val salaryMonth = countSalary(employeeSalary?.toLong()!!, attendanceEmployeeSummary)
+            val totalTax = countTax((salaryMonth + bonus.toInt()), tax)
+
+            if (insertPayrollResponse is Result.Empty) {
+                payrollViewModel.insertPayroll(
+                    PayrollRequest(
+                        PayrollRequestData(
+                            user = employeeSelected.id.toString(),
+                            month = dateToUTC(monthSummary.start),
+                            bonus = bonus,
+                            workDays = attendanceEmployeeSummary.present.toString(),
+                            workSalary = salaryMonth.toString(),
+                            deduction = deduction,
+                            tax = totalTax.toString(),
+                            totalSalary = (salaryMonth + bonus.toInt() - deduction.toInt() - totalTax).toString()
+                        )
+                    )
+                )
+            }
+        }
+        is Result.Error -> {
+            Toast.makeText(
+                navController.context,
+                "Gagal mengambil data absensi",
+                Toast.LENGTH_SHORT
+            )
+                .show()
+        }
+        else -> {
+
+        }
+    }
+
+    fun addPayroll() {
+        val monthSummary = monthStartEnd(monthSelected.value)
+
+        attendanceViewModel.getAttendanceUserByDate(
+            employeeSelected.id.toString(),
+            monthSummary.start,
+            monthSummary.end
+        )
+
+    }
+
     employeeViewModel.getEmployeeList("")
-    val employees = employeeViewModel.employeeData.collectAsState().value
-    val employeeResponse = employeeViewModel.getEmployeeListResponse.collectAsState().value
+
 
     when (employeeResponse) {
         is Result.Success -> {
@@ -113,10 +216,10 @@ fun HrPayrollFormScreen(
             Text(text = "Employee Name", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
             Spacer(modifier = Modifier.height(16.dp))
             Dropdown(
-                value = employeSelected.value,
+                value = employeeSelected.value,
                 dropDownItems = employeeDropdown.value,
                 onItemClick = {
-                    setEmployeSelected(it)
+                    setEmployeeSelected(it)
                 },
                 placeholder = "Select Employee"
             )
@@ -179,7 +282,9 @@ fun HrPayrollFormScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(45.dp),
-                onClick = { /*TODO*/ }, text = "Add Payroll"
+                onClick = {
+                    addPayroll()
+                }, text = "Add Payroll"
             )
 
             Spacer(modifier = Modifier.height(50.dp))

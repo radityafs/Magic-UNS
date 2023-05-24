@@ -117,21 +117,29 @@ fun RequestDetailScreen(
                         contentDescription = "Success",
                         modifier = Modifier.size(72.dp)
                     )
-                    Spacer(modifier = Modifier.width(12.dp))
                 }
 
                 if (data?.attributes?.isApproved == "waiting") {
                     Image(
-                        painter = painterResource(R.drawable.baseline_access_time_24),
+                        painter = painterResource(R.drawable.icon_state_waiting),
                         contentDescription = "Waiting",
                         modifier = Modifier.size(72.dp)
                     )
-                    Spacer(modifier = Modifier.width(12.dp))
                 }
 
+                if(data?.attributes?.isApproved == "rejected"){
+                    Image(
+                        painter = painterResource(R.drawable.icon_state_rejected),
+                        contentDescription = "Rejected",
+                        modifier = Modifier.size(72.dp)
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
                 Text(
-                    text = if (data?.attributes?.isApproved.toString() == "approved") "Approved" else if (data?.attributes?.isApproved.toString() == "waiting") "Waiting" else "Rejected",
-                    fontSize = 20.sp,
+                    text = if (data?.attributes?.isApproved.toString() == "approved") "Request Approved" else if (data?.attributes?.isApproved.toString() == "waiting") "Request Waiting" else "Request Rejected",
+                    fontSize = 14.sp,
                     fontWeight = FontWeight.SemiBold,
                 )
 
